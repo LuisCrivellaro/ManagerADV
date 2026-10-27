@@ -6,8 +6,11 @@ export async function saveOffice(owner: string, state: OfficeState) {
  for(let attempt=0;attempt<5;attempt++){
   const row=await supabase.from('office_workspace').select('dados,updated_at').eq('owner_id',owner).maybeSingle();
   if(row.error)throw row.error;
-  const pause=(row.data?.dados as unknown as OfficeState|undefined)?.anaPausa;
-  const next={...state,...(pause?.ativa?{anaPausa:pause}:{})};
+  const salvo=row.data?.dados as unknown as OfficeState|undefined;
+  const pause=salvo?.anaPausa;
+  // A entrada do WhatsApp é salva só pelo servidor (Canal e Agente); a tela nunca a sobrescreve.
+  const {entradaWhatsApp:_ignorada,...estado}=state;
+  const next={...estado,...(pause?.ativa?{anaPausa:pause}:{}),...(salvo?.entradaWhatsApp?{entradaWhatsApp:salvo.entradaWhatsApp}:{})};
   const r=row.data?await supabase.from('office_workspace').update({dados:next as unknown as Json,updated_at:new Date().toISOString()}).eq('owner_id',owner).eq('updated_at',row.data.updated_at).select('owner_id'):await supabase.from('office_workspace').insert({owner_id:owner,dados:next as unknown as Json}).select('owner_id');
   if(r.error)throw r.error;
   if(r.data?.length)return;

@@ -13,6 +13,7 @@ import { actionLabels, type AttendanceAction } from './attendance-actions';
 import {
   lerConfigCanal, salvarConfigCanal, listarContatosTeste, salvarContatoTeste,
   registrarWebhookUltramsg, verificarUltramsg, registrarWebhookTelegram, verificarTelegram,
+  lerEntradaWhatsApp, salvarEntradaWhatsApp,
 } from '@/lib/atendimento/envio.functions';
 import type { Conversa } from '@/lib/mock-data';
 
@@ -34,11 +35,14 @@ export function CanalAgente({ open, onOpenChange, conversas, onConfig }: {
   const verificarWa = useServerFn(verificarUltramsg);
   const registrarTg = useServerFn(registrarWebhookTelegram);
   const verificarTg = useServerFn(verificarTelegram);
+  const lerEntrada = useServerFn(lerEntradaWhatsApp);
+  const salvarEntrada = useServerFn(salvarEntradaWhatsApp);
   const [webhookInfo, setWebhookInfo] = useState<string>('');
   const [form, setForm] = useState({ nome: '', chatId: '', telefone: '' });
 
   const config = useQuery({ queryKey: ['canal-config'], queryFn: () => read(), enabled: open });
   const contatos = useQuery({ queryKey: ['contatos-teste'], queryFn: () => readContatos(), enabled: open });
+  const entrada = useQuery({ queryKey: ['entrada-whatsapp'], queryFn: () => lerEntrada(), enabled: open });
   const refresh = () => Promise.all([qc.invalidateQueries({ queryKey: ['canal-config'] }), qc.invalidateQueries({ queryKey: ['contatos-teste'] })]);
 
   const cfg = config.data?.config;
@@ -105,7 +109,18 @@ export function CanalAgente({ open, onOpenChange, conversas, onConfig }: {
         {webhookInfo && <p className="mt-2 text-xs text-muted-foreground">{webhookInfo}</p>}
       </Cartao>
 
-      <Cartao title="Contatos de teste">
+      <Cartao title="WhatsApp do escritório">
+        <label className="flex items-center justify-between gap-4 text-sm">Atender todo mundo que escrever
+          <Switch checked={entrada.data?.ativa ?? false} disabled={!entrada.data} aria-label="Atender todo mundo que escrever no WhatsApp do escritório"
+            onCheckedChange={ativa => void executar(ativa ? 'Abrir entrada do WhatsApp' : 'Fechar entrada do WhatsApp', async () => { await salvarEntrada({ data: { ativa } }); await qc.invalidateQueries({ queryKey: ['entrada-whatsapp'] }); })} />
+        </label>
+        <p className="mt-1 text-xs text-muted-foreground">{entrada.data?.ativa
+          ? 'Ligado: quem escrever no número do escritório ganha uma conversa na sua conta e é atendido pela Ana. Para a Ana não responder alguém, use Bloquear na lista de contatos.'
+          : 'Desligado: a Ana responde só os contatos liberados na lista abaixo.'}</p>
+        <p className="mt-1 text-xs text-muted-foreground">Se a equipe responder pelo celular do escritório, a Ana para naquela conversa até alguém tocar em “Retomar Ana”. Para isso funcionar, toque em “Registrar recebimento do WhatsApp” uma vez depois de publicar.</p>
+      </Cartao>
+
+      <Cartao title="Contatos">
         <div className="mb-3 grid gap-2 sm:grid-cols-[1fr_1fr_1fr_auto]">
           <Input aria-label="Nome do contato" placeholder="Nome" value={form.nome} onChange={e => setForm({ ...form, nome: e.target.value })} />
           <Input aria-label="Número de WhatsApp" placeholder={canalContato === 'telegram' ? 'chat_id do Telegram' : 'WhatsApp com DDD'} value={form.chatId} onChange={e => setForm({ ...form, chatId: e.target.value })} />

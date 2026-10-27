@@ -8,6 +8,8 @@ import { chaveTelefone } from '@/lib/atendimento/telefone';
 import { numeroWhatsApp } from '@/lib/atendimento/canais/ultramsg';
 import { textoEscolhaHorario } from '@/lib/atendimento/botoes-horario';
 import { iniciarAtendimentoAutomatico } from '@/lib/atendimento/initial-attendance';
+import { decidirEntradaWhatsApp, destinoIgnoradoWhatsApp, mensagemDoSistema } from '@/lib/atendimento/entrada-whatsapp';
+import type { Conversa } from '@/lib/mock-data';
 
 function seguroIgual(a: string, b: string) {
   const ba = Buffer.from(a), bb = Buffer.from(b);
@@ -23,6 +25,7 @@ const Payload = z.object({
   data: z.object({
     id: z.string().max(300),
     from: z.string().max(80),
+    to: z.string().max(80).optional(),
     body: z.string().max(16000).optional().default(''),
     type: z.string().max(30).optional().default('chat'),
     media: z.string().max(2000).optional(),
@@ -63,6 +66,40 @@ async function guardarMidia(admin: any, url: string, nomeOriginal: string | unde
   } catch { return undefined; }
 }
 
+type Admin = Parameters<typeof import('@/lib/atendimento/ana.server').atualizarConversa>[0];
+const esperar = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
+ * Resposta digitada no celular do escritório: registra na conversa e pausa a Ana só ali.
+ * Mensagens do próprio sistema (Ana ou envio pelo Manager) também chegam aqui e são reconhecidas pelo texto;
+ * como podem chegar antes de serem gravadas, a conferência é repetida uma vez após alguns segundos.
+ */
+async function registrarRespostaManual(admin: Admin, contato: { conversa_id: string | null; contato_externo: string; status: string } | undefined, data: { id: string; body?: string; type?: string }, auditar: (acao: string, resumo: string, status: string) => unknown) {
+  if (!contato || contato.status !== 'liberado' || !contato.conversa_id) return Response.json({ ok: true, ignorado: true });
+  const conversaId = contato.conversa_id;
+  const msgId = `ultramsg:${contato.contato_externo}:${data.id}`;
+  const ler = async () => (await admin.from('casos').select('dados').eq('id', conversaId).maybeSingle()).data?.dados as unknown as Conversa | undefined;
+  const texto = data.body ?? '';
+  const sistema = (c: Conversa) => (data.type ?? 'chat') === 'chat' && mensagemDoSistema(texto, c);
+  let conversa = await ler();
+  if (!conversa || conversa.mensagens.some(m => m.id === msgId)) return Response.json({ ok: true, ignorado: true });
+  if (sistema(conversa)) return Response.json({ ok: true, sistema: true });
+  await esperar(Number(process.env['WHATSAPP_ESPERA_MANUAL_MS'] || 4000));
+  conversa = await ler();
+  if (!conversa || sistema(conversa)) return Response.json({ ok: true, sistema: true });
+  const { atualizarConversa } = await import('@/lib/atendimento/ana.server');
+  const agora = new Date();
+  const aviso = 'Equipe respondeu pelo celular do escritório; Ana pausada nesta conversa. Use "Retomar Ana" para devolver.';
+  await atualizarConversa(admin, conversaId, c => c.mensagens.some(m => m.id === msgId) ? c : {
+    ...c,
+    mensagens: [...c.mensagens, { id: msgId, de: 'escritorio', texto: texto || '[arquivo enviado pelo celular do escritório]', hora: agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' }), dataHora: agora.toISOString(), canal: 'ultramsg', idExterno: data.id, autor: 'Equipe · celular do escritório', status: 'enviada' }],
+    agenteAna: { ...c.agenteAna, humano: true, proximoPasso: aviso },
+    timeline: [...(c.timeline ?? []), { data: agora.toISOString(), evento: aviso }],
+  });
+  await auditar('respostaManualWhatsApp', 'Resposta pelo celular do escritório; Ana pausada na conversa', 'sucesso');
+  return Response.json({ ok: true, pausada: true });
+}
+
 export const Route = createFileRoute('/api/public/atendimento/whatsapp')({
   server: {
     handlers: {
@@ -76,7 +113,10 @@ export const Route = createFileRoute('/api/public/atendimento/whatsapp')({
         const { event_type, instanceId, data } = parsed.data;
         const instancia = (process.env['ULTRAMSG_INSTANCE_ID'] ?? '').replace(/^instance/, '');
         if (instanceId !== undefined && String(instanceId).replace(/^instance/, '') !== instancia) return new Response('Unauthorized', { status: 401 });
-        if (event_type !== 'message_received' || data.fromMe || data.from.endsWith('@g.us')) return Response.json({ ok: true, ignorado: true });
+        if (destinoIgnoradoWhatsApp(data.from) || (data.to && destinoIgnoradoWhatsApp(data.to))) return Response.json({ ok: true, ignorado: true });
+        // Mensagem criada no próprio número do escritório (celular ou envio do sistema): só serve para pausar a Ana.
+        const manual = event_type === 'message_create' && data.fromMe === true;
+        if (!manual && (event_type !== 'message_received' || data.fromMe)) return Response.json({ ok: true, ignorado: true });
 
         const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
         const auditar = (acao: string, resumo: string, status: string) =>
@@ -85,11 +125,30 @@ export const Route = createFileRoute('/api/public/atendimento/whatsapp')({
         const config = await supabaseAdmin.from('atendimento_canal_config').select('canal_ativo').eq('id', true).maybeSingle();
         if (config.data?.canal_ativo !== 'ultramsg') { await auditar('mensagemRecebida', 'WhatsApp desligado · mensagem ignorada', 'bloqueado'); return Response.json({ ok: true, ignorado: true }); }
 
-        const numero = numeroWhatsApp(data.from);
-        const lista = await supabaseAdmin.from('atendimento_contatos_teste').select('id,conversa_id,contato_externo,status').eq('canal', 'ultramsg');
-        const contato = (lista.data ?? []).find(c => chaveTelefone(c.contato_externo) === chaveTelefone(numero));
+        const numero = numeroWhatsApp(manual ? data.to ?? '' : data.from);
+        const lerContatos = async () => {
+          const lista = await supabaseAdmin.from('atendimento_contatos_teste').select('id,conversa_id,contato_externo,status').eq('canal', 'ultramsg');
+          return (lista.data ?? []).find(c => chaveTelefone(c.contato_externo) === chaveTelefone(numero));
+        };
+        let contato = await lerContatos();
+        if (manual) return registrarRespostaManual(supabaseAdmin, contato, data, auditar);
+
+        // Celular próprio do escritório: com a entrada aberta, quem escrever ganha conversa; bloqueados nunca.
+        const { donaEntradaWhatsApp, abrirConversaWhatsApp } = await import('@/lib/atendimento/entrada-whatsapp.server');
+        const dona = contato?.status === 'liberado' && contato.conversa_id ? {} : await donaEntradaWhatsApp(supabaseAdmin);
+        const decisao = decidirEntradaWhatsApp(contato, !!dona.ownerId);
+        if (decisao === 'criar' || decisao === 'liberar') {
+          try {
+            await abrirConversaWhatsApp(supabaseAdmin, dona.ownerId ?? '', numero, data.pushname, contato);
+            await auditar('novoContatoWhatsApp', `Nova conversa aberta · ${mascararContato(numero)}`, 'sucesso');
+          } catch {
+            // Outra mensagem do mesmo número pode ter aberto a conversa ao mesmo tempo: a releitura abaixo decide.
+            await auditar('novoContatoWhatsApp', `Conversa não aberta nesta mensagem · ${mascararContato(numero)}`, 'erro');
+          }
+          contato = await lerContatos();
+        }
         if (!contato || contato.status !== 'liberado' || !contato.conversa_id) {
-          await auditar('mensagemRecebida', `Contato WhatsApp não liberado · ${mascararContato(numero)}`, 'bloqueado');
+          await auditar('mensagemRecebida', decisao === 'bloqueado' ? `Contato WhatsApp bloqueado · ${mascararContato(numero)}` : `Contato WhatsApp não liberado · ${mascararContato(numero)}${dona.motivo ? ` · ${dona.motivo}` : ''}`, 'bloqueado');
           return Response.json({ ok: true, ignorado: true });
         }
         const caso = await supabaseAdmin.from('casos').select('id,owner_id,dados').eq('id', contato.conversa_id).maybeSingle();

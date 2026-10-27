@@ -33,4 +33,26 @@ describe.each(['telegram','ultramsg'] as const)('consentimento de agenda pelo %s
  it('pergunta não enviada não autoriza confirmação',async()=>{const h=setup(canal);mocks.enviar.mockRejectedValueOnce(new Error('Envio indisponível'));await h.message('quero cancelar');expect(h.saved.agenteAna?.confirmacaoCancelamento).toBeUndefined();h.patch(c=>({...c,agenteAna:{...c.agenteAna,humano:false,pausa:false}}));await h.message('sim');expect(mocks.cancelar).not.toHaveBeenCalled();});
  it('remarcar oferece horários distintos do atual e usa novo recibo após escolha',async()=>{const h=setup(canal);await h.message('quero remarcar');const slots=h.saved.agenteAna?.horariosTeste??[];expect(slots).toHaveLength(3);expect(slots).not.toContain(h.reserva.inicio);expect(h.saved.agenteAna?.autorizacaoRemarcacao?.eventoId).toBe(h.reserva.id);const novo=slots[0];if(!novo)throw new Error('Missing offer');mocks.remarcar.mockResolvedValue({id:'novo-evento',inicio:novo,fim:new Date(Date.parse(novo)+30*60000).toISOString()});await h.message('a primeira');expect(mocks.remarcar).toHaveBeenCalledWith(h.saved.id,h.reserva,novo,true,expect.any(Date),{nome:'Maria Silva',telefone:'5511999600306',tipo:'novo'});expect(h.saved.consultaAgendada).toBe(novo);expect(h.saved.agenteAna?.reservaCalendar?.id).toBe('novo-evento');});
  it('frustração consulta novamente sem repetir nenhuma oferta e sem encaminhamento delicado',async()=>{const h=setup(canal,false);await h.message('quero agendar');const first=h.saved.agenteAna?.horariosTeste??[];await h.message('mas você me deu os mesmos horários!');const second=h.saved.agenteAna?.horariosTeste??[];expect(second).toHaveLength(3);expect(second.every(s=>!first.includes(s))).toBe(true);expect(h.saved.agenteAna?.humano).toBe(false);expect(h.saved.agenteAna?.motivo).toBe('');expect(mocks.ocupados).toHaveBeenCalledTimes(2);});
+});describe('primeira lista depois de pedir o nome',()=>{
+ it('não guarda horários nunca mostrados e a primeira lista usa o texto inicial com os primeiros horários livres',async()=>{
+  const h=setup('telegram',false);
+  h.patch(c=>({...c,agenteAna:{...c.agenteAna,dados:{nome:'',email:'',cpf:'',assunto:''},horariosTeste:[],agendaReal:false}}));
+  await h.message('quero marcar uma consulta');
+  expect(mocks.enviar.mock.calls.at(-1)?.[0]?.texto).toBe('Qual é seu nome completo?');
+  expect(h.saved.agenteAna?.horariosTeste??[]).toEqual([]);
+  mocks.gerar.mockResolvedValue({acao:'enviar',mensagem:'Obrigada!',intencao:'agendamento',encaminhar_humano:false,motivo_aprovacao:'',urgente:false,dados_coletados:{nome:'Mariana Souza Lima',cpf:'',email:'',assunto:''},proximo_passo:''});
+  await h.message('Mariana Souza Lima');
+  const texto=String(mocks.enviar.mock.calls.at(-1)?.[0]?.texto??'');
+  expect(texto.startsWith('Claro! Seguem os horários livres para a sua consulta online e gratuita:')).toBe(true);
+  expect(texto).toContain('🗓️ Consulta online');
+  expect(h.saved.agenteAna?.horariosTeste?.[0]).toBe('2026-10-27T12:00:00.000Z');
+ });
+ it('horários fictícios salvos antes da correção não contam como já oferecidos',async()=>{
+  const h=setup('telegram',false);
+  h.patch(c=>({...c,agenteAna:{...c.agenteAna,horariosTeste:['2026-10-28T12:00:00.000Z','2026-10-28T12:30:00.000Z','2026-10-28T13:00:00.000Z'],agendaReal:false}}));
+  await h.message('quero agendar');
+  const texto=String(mocks.enviar.mock.calls.at(-1)?.[0]?.texto??'');
+  expect(texto.startsWith('Claro! Seguem os horários livres')).toBe(true);
+  expect(h.saved.agenteAna?.horariosTeste?.[0]).toBe('2026-10-27T12:00:00.000Z');
+ });
 });

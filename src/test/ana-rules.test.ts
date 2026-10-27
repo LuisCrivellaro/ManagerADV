@@ -46,3 +46,26 @@ describe('agenda real',()=>{
  it('pula horário ocupado no Google Calendar',()=>{const s=horariosLivresAna([{start:'2026-10-26T12:00:00Z',end:'2026-10-26T13:00:00Z'}],new Date('2026-10-23T20:00:00Z'));expect(s[0]).toBe('2026-10-26T13:00:00.000Z');expect(s).not.toContain('2026-10-26T12:00:00.000Z');});
  it('oferta real ainda não é confirmação de reserva',()=>{const r=respostaAgendaTeste('26/10 às 10h30',['2026-10-26T13:30:00.000Z'],new Date(),true);expect(r.selected).toBe('2026-10-26T13:30:00.000Z');});
 });
+describe('escopo só de agendamento',()=>{
+ const dentro=new Date('2026-10-27T13:00:00Z');
+ it('pedido explícito de pessoa mantém a mensagem de sempre',()=>{
+  const r=aplicarRegrasAna({...response,intencao:'outro',encaminhar_humano:true},'Automática','Quero falar com a doutora',[],{now:dentro});
+  expect(r.encaminhar_humano).toBe(true);
+  expect(r.mensagem.startsWith('Claro! Já passei sua conversa para a equipe.')).toBe(true);
+ });
+ it('assunto da equipe passado pela Ana explica que ela só agenda',()=>{
+  const r=aplicarRegrasAna({...response,intencao:'outro',encaminhar_humano:true},'Automática','Como está meu processo?',[],{now:dentro});
+  expect(r.encaminhar_humano).toBe(true);
+  expect(r.mensagem).toBe('Por aqui eu cuido só dos agendamentos, então passei sua conversa para a equipe.\nAlguém responsável te responde por aqui ainda hoje.');
+ });
+ it('pergunta jurídica oferece a consulta sem prometer anotar o caso',()=>{
+  const r=aplicarRegrasAna({...response,intencao:'novo_caso'},'Automática','Tenho direito a indenização?',[]);
+  expect(r.mensagem).toContain('Por aqui eu cuido só dos agendamentos');
+  expect(r.mensagem).not.toContain('continuar anotando');
+  expect(r.encaminhar_humano).toBe(false);
+ });
+ it('reclamação recebe acolhimento sem oferta de consulta',()=>{
+  const r=aplicarRegrasAna({...response,intencao:'reclamacao'},'Automática','Ninguém me responde, que absurdo',[]);
+  expect(r.mensagem).toBe('Sinto muito por isso.\nDeixei registrado para a equipe olhar com cuidado.');
+ });
+});

@@ -307,7 +307,7 @@ export const registrarWebhookUltramsg = createServerFn({ method: 'POST' })
     const base = process.env['PUBLIC_APP_URL'] ?? 'https://atendimento-legal-desk.lovable.app';
     const r = await fetch(`https://api.ultramsg.com/${encodeURIComponent(inst)}/instance/settings`, {
       method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({ token, webhook_url: `${base}/api/public/atendimento/whatsapp?s=${secret}`, webhook_message_received: 'true', webhook_message_create: 'false', webhook_message_ack: 'false', webhook_message_download_media: 'true' }).toString(),
+      body: new URLSearchParams({ token, webhook_url: `${base}/api/public/atendimento/whatsapp?s=${secret}`, webhook_message_received: 'true', webhook_message_create: 'true', webhook_message_ack: 'false', webhook_message_download_media: 'true' }).toString(),
       signal: AbortSignal.timeout(15000),
     });
     if (!r.ok) {
@@ -364,4 +364,38 @@ export const verificarTelegram = createServerFn({ method: 'GET' })
     if (!r.ok || !corpo?.ok) throw new Error(`Não foi possível verificar o Telegram (HTTP ${r.status}).`);
     const url = corpo.result?.url ?? '';
     return { registrado: url.endsWith('/api/public/atendimento/telegram'), pendentes: corpo.result?.pending_update_count ?? 0, erro: (corpo.result?.last_error_message ?? '').slice(0, 200) };
+  });
+
+/** Entrada do WhatsApp do escritório (celular próprio): lida na área de trabalho de quem abriu. Só sênior/admin. */
+export const lerEntradaWhatsApp = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await exigirGestor(context.supabase, context.userId);
+    const ws = await context.supabase.from('office_workspace').select('dados').eq('owner_id', context.userId).maybeSingle();
+    if (ws.error) throw new Error('Não foi possível ler a entrada do WhatsApp.');
+    const entrada = (ws.data?.dados as { entradaWhatsApp?: { ativa?: boolean; atualizadoEm?: string } } | null)?.entradaWhatsApp;
+    return { ativa: entrada?.ativa === true, atualizadoEm: entrada?.atualizadoEm ?? '' };
+  });
+
+/** Abre ou fecha a entrada: com ela aberta, quem escrever no WhatsApp do escritório ganha conversa na conta de quem abriu. */
+export const salvarEntradaWhatsApp = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ ativa: z.boolean() }))
+  .handler(async ({ data, context }) => {
+    const ator = await exigirGestor(context.supabase, context.userId);
+    const entradaWhatsApp = { ativa: data.ativa, atualizadoEm: new Date().toISOString() };
+    for (let tentativa = 0; tentativa < 5; tentativa++) {
+      const row = await context.supabase.from('office_workspace').select('dados,updated_at').eq('owner_id', context.userId).maybeSingle();
+      if (row.error) throw new Error('Não foi possível salvar a entrada do WhatsApp.');
+      const dados = { ...((row.data?.dados as Record<string, unknown> | null) ?? {}), entradaWhatsApp };
+      const r = row.data
+        ? await context.supabase.from('office_workspace').update({ dados: dados as never, updated_at: new Date().toISOString() }).eq('owner_id', context.userId).eq('updated_at', row.data.updated_at).select('owner_id')
+        : await context.supabase.from('office_workspace').insert({ owner_id: context.userId, dados: dados as never }).select('owner_id');
+      if (r.error) throw new Error('Não foi possível salvar a entrada do WhatsApp.');
+      if (r.data?.length) {
+        await auditar(context.supabase, ator, 'salvarEntradaWhatsApp', data.ativa ? 'Entrada do WhatsApp aberta: novos contatos atendidos pela Ana' : 'Entrada do WhatsApp fechada: só contatos liberados', 'sucesso');
+        return entradaWhatsApp;
+      }
+    }
+    throw new Error('Área de trabalho alterada ao mesmo tempo. Tente de novo.');
   });
