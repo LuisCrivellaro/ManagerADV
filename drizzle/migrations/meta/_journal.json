@@ -1,0 +1,76 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792444738847,
+      "tag": "0000_auth_profiles_casos",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792445889497,
+      "tag": "0001_office_workspace",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792445927793,
+      "tag": "0002_legal_approvals",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792447201431,
+      "tag": "0003_material_approval_gates",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792447330587,
+      "tag": "0004_harden_approval_insert_gates",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792449838770,
+      "tag": "0005_draft_approval_queue",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792451784922,
+      "tag": "0006_master_and_senior_full_access",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792607088556,
+      "tag": "0007_atendimento_canais_config_contatos_audit",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792607228742,
+      "tag": "0008_grant_service_role_canal_functions",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793040035545,
+      "tag": "0009_migration",
+      "breakpoints": true
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+ALTER TABLE public.casos ADD COLUMN IF NOT EXISTS ana_estado jsonb;

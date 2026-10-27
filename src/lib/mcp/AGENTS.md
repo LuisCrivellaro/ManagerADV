@@ -1,0 +1,1 @@
+- MCP tools here are read-only and use the caller's OAuth token with existing RLS (consent at `/.lovable/oauth/consent`); why: assistants act as the signed-in user without bypassing legal gates.
