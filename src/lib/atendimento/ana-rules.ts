@@ -8,7 +8,7 @@ import { bloqueiaAgenda, pedidoHumano, escolherHorarioAna, listaHorariosAna, ped
 
 export const anaSchema = z.object({
   acao: z.enum(['enviar', 'rascunho', 'nenhuma']), mensagem: z.string(), motivo_aprovacao: z.string(),
-  intencao: z.enum(['duvida_geral','novo_caso','agendamento','processo','documento','reclamacao','outro']),
+  intencao: z.enum(['duvida_geral','novo_caso','agendamento','processo','consulta_processo','documento','reclamacao','outro']),
   urgente: z.boolean(), encaminhar_humano: z.boolean(),
   dados_coletados: z.object({ nome:z.string(), cpf:z.string(), assunto:z.string(), email:z.string() }),
   proximo_passo: z.string(),

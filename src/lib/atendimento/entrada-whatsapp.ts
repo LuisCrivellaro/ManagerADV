@@ -37,7 +37,7 @@ const normalizar = (t: string) => t.normalize('NFC').toLowerCase().replace(/\s+/
 /**
  * Mensagem enviada pelo próprio número do escritório: é do sistema (Ana ou envio pelo Manager) quando o texto
  * coincide com uma mensagem do escritório registrada nos últimos 30 minutos ou com a resposta que a Ana está enviando.
- * O UltraMsg pode acrescentar a lista numerada de horários ao final, por isso o início também vale.
+ * O UltraMsg pode acrescentar ao final, com marcadores, horários que faltavam no texto; por isso o início também vale.
  */
 export function mensagemDoSistema(texto: string, conversa: { mensagens: Pick<Mensagem, 'de' | 'texto' | 'dataHora'>[]; agenteAna?: { resultado?: { mensagem?: string } } }, agora = new Date()) {
   const corpo = normalizar(texto);

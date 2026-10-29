@@ -14,7 +14,12 @@ export const checkConnection=createServerFn({method:'POST'}).middleware([require
  const service=connectionCatalog.find(c=>c.id===data.service);if(!service)throw new Error('Serviço indisponível.');
  const missing=service.requirements.filter(r=>!process.env[r.key]?.trim()).map(r=>r.label);
  if(missing.length)return {connected:false,message:`Credenciais não salvas: ${missing.join(', ')}.`,checkedAt:new Date().toISOString()};
- if(data.service==='projuris')return {connected:false,message:'Falta confirmar a autenticação e o endereço de consulta do ProJuris ADV do escritório.',checkedAt:new Date().toISOString()};
+ if(data.service==='projuris'){
+  // Só autenticação (client_credentials): nenhum dado do ProJuris é consultado nesta verificação.
+  const { projuris, ErroProjuris } = await import('./projuris/cliente.server');
+  try{await projuris.verificarAutenticacao();return {connected:true,message:'Autenticação no ProJuris verificada. Nenhum dado foi consultado.',checkedAt:new Date().toISOString()};}
+  catch(e){const tipo=e instanceof ErroProjuris?e.tipo:undefined;return {connected:false,message:tipo==='autenticacao'?'Credencial recusada pelo ProJuris.':tipo==='configuracao'?'Credenciais não salvas.':'Não foi possível verificar a conexão com o ProJuris. Tente novamente.',checkedAt:new Date().toISOString()};}
+ }
  if(data.service==='ultramsg')return {connected:false,message:'A verificação aguarda confirmação de autenticação segura sem token no endereço da requisição.',checkedAt:new Date().toISOString()};
  const key=data.service==='zapsign'?process.env['ZAPSIGN_API_TOKEN']:process.env['MERCADOPAGO_ACCESS_TOKEN'];
  try{

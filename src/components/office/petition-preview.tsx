@@ -1,4 +1,0 @@
-import { documentBlocks } from '@/lib/legal/visual-law';
-export function PetitionPreview({text}:{text:string}){
- return <div className="overflow-x-auto bg-muted p-3 sm:p-6"><article className="legal-paper mx-auto" aria-label="Peça formatada"><header className="legal-letterhead"><strong>CS LAWYERS | ADVOCACIA</strong><span>BRASIL • DUBAI • PORTUGAL</span></header><div className="legal-copy">{documentBlocks(text).map((b,i)=>b.kind==='table'?<table key={i}><tbody>{b.rows.map((r,j)=><tr key={j}>{r.map((v,k)=>j===0?<th key={k}>{v}</th>:<td key={k}>{v}</td>)}</tr>)}</tbody></table>:<p key={i} className={`legal-${b.kind}`}>{b.text||'\u00a0'}</p>)}</div><footer className="legal-letterfoot"><span>CS LAWYERS | carolinasantos.com.br</span><span>contato@carolinasantos.com.br | (11) 91858-2706</span></footer></article></div>;
-}

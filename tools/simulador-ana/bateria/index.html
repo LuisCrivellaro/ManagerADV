@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bateria de testes da Ana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F4F7F7; --surface:#FFFFFF; --ink:#0D1F1E; --muted:#5A6B6A; --line:#D7E3E2;
+  --petroleo:#0F3533; --aqua:#007F7B; --aqua-hover:#006A67; --aqua-soft:#E9F7F6;
+  --ok:#1D7A4E; --ok-soft:#E3F3EA; --alerta:#8A5A00; --alerta-soft:#FFF4D6; --perigo:#B42318; --perigo-soft:#FDECEA;
+  --font-serif:"EB Garamond",Georgia,serif; --font-sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif; --font-mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0B1716; --surface:#11211F; --ink:#E4EFEE; --muted:#93A8A6; --line:#22403D; --petroleo:#0A2422; --aqua:#2FB3AD; --aqua-hover:#4CC5BF; --aqua-soft:#143331;
+  --ok:#5CCB93; --ok-soft:#163327; --alerta:#E7B44C; --alerta-soft:#33290F; --perigo:#F2877C; --perigo-soft:#3A1A17; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B1716; --surface:#11211F; --ink:#E4EFEE; --muted:#93A8A6; --line:#22403D; --petroleo:#0A2422; --aqua:#2FB3AD; --aqua-hover:#4CC5BF; --aqua-soft:#143331;
+  --ok:#5CCB93; --ok-soft:#163327; --alerta:#E7B44C; --alerta-soft:#33290F; --perigo:#F2877C; --perigo-soft:#3A1A17; color-scheme:dark}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 var(--font-sans)}
+header{background:var(--petroleo);color:#fff;padding:18px 20px}
+header h1{font:600 26px/1.1 var(--font-serif);margin:0}
+header p{margin:4px 0 0;opacity:.85;font-size:13px}
+main{max-width:1180px;margin:0 auto;padding:16px}
+.painel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.linha{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{font:500 13px var(--font-sans);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px 12px;cursor:pointer}
+button.principal{background:var(--aqua);border-color:var(--aqua);color:#fff}
+button.principal:hover{background:var(--aqua-hover)}
+button:disabled{opacity:.5;cursor:default}
+select{font:13px var(--font-sans);padding:7px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0}
+.seg button[aria-pressed="true"]{background:var(--aqua-soft);color:var(--aqua);font-weight:600}
+.sub{color:var(--muted);font-size:12.5px;margin:6px 0 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{border-radius:999px;padding:4px 10px;font-size:12.5px;font-weight:600;background:var(--aqua-soft)}
+.st{display:inline-block;border-radius:6px;padding:2px 8px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.PASSOU{background:var(--ok-soft);color:var(--ok)}
+.FALHOU{background:var(--perigo-soft);color:var(--perigo)}
+.PARCIAL{background:var(--alerta-soft);color:var(--alerta)}
+.NAO{background:var(--aqua-soft);color:var(--muted)}
+.lista{display:flex;flex-direction:column;gap:8px}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.cab{display:grid;grid-template-columns:150px 54px 1fr auto;gap:10px;align-items:center;padding:10px 12px;cursor:pointer}
+.cab .t{font-weight:600}
+.cab .m{color:var(--muted);font-size:12.5px;grid-column:3/4}
+.det{border-top:1px solid var(--line);padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.det h3{font:600 15px var(--font-serif);margin:0 0 6px}
+.det dl{margin:0;display:grid;grid-template-columns:150px 1fr;gap:4px 10px;font-size:12.5px}
+.det dt{color:var(--muted)}
+.det dd{margin:0}
+.msg{border-radius:8px;padding:6px 9px;margin:4px 0;font-size:12.5px;white-space:pre-wrap}
+.msg.cliente{background:var(--aqua-soft)}
+.msg.ana{background:var(--bg);border:1px solid var(--line)}
+.msg.revisora{background:var(--alerta-soft)}
+.msg.sistema{color:var(--muted);font-style:italic}
+.ok{color:var(--ok)} .ko{color:var(--perigo)}
+.crit{display:grid;grid-template-columns:200px 30px 1fr;gap:4px 8px;font-size:12.5px}
+code{font-family:var(--font-mono);font-size:12px}
+.full{grid-column:1/-1}
+@media (max-width:760px){.cab{grid-template-columns:1fr auto}.cab .m{grid-column:1/-1}.det{grid-template-columns:1fr}.det dl{grid-template-columns:1fr}.crit{grid-template-columns:1fr 30px}.crit .mot{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<header><h1>Bateria de testes da Ana</h1><p>CS Lawyers · Manager ADV · dados fictícios · nenhuma mensagem sai daqui</p></header>
+<main id="app"></main>
+<script type="module" src="./main.ts"></script>
+</body>
+</html>

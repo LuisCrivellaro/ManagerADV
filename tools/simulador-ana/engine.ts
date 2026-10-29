@@ -10,6 +10,8 @@ import { iniciarAtendimentoAutomatico } from '@/lib/atendimento/initial-attendan
 import { horarioPermitido, DURACAO_REUNIAO } from '@/lib/atendimento/schedule-rules';
 import { decidirAlteracaoConsulta, decidirCancelamentoAna, operacaoExpirada } from '@/lib/atendimento/appointment-management';
 import { solicitarEmailPendente } from '@/lib/atendimento/email-rules';
+import { iniciarConsultaProcesso, respostaDuranteEspera, apenasInsistencia, deveConsultarProcesso, mensagemNaoCliente, interpretarRespostaRevisora, aplicarDecisao, pendencias, respostaAutorizada, CONFIG_CONSULTA_PADRAO, TEXTOS_CONSULTA, type ConfigConsultaProcesso, type PedidoProcesso, type PortasConsulta, type EntradaRedacao } from '@/lib/atendimento/consulta-processo';
+import { criarProjurisFicticio, projurisFicticioPadrao, type FalhaFicticia, type ProjurisFicticio } from '@/lib/projuris/ficticio';
 import { bloqueiaAgenda, pedidoHumano, escolherHorarioAna, pedidoHorarioEspecifico, horarioEspecificoLivre, selecionarOpcoesAna, linhaHorarioAna, listaHorariosAna, pedidoOutrasOpcoesAna, frustracaoHorariosAna, temPreferenciaAna, horizonteAgendaAna, limitarNomeAna } from '@/lib/atendimento/ana-scheduling';
 
 export interface Treino { instrucoes: string; proibidos: string[]; exemplos: { pergunta: string; resposta: string }[] }
@@ -31,6 +33,8 @@ export interface Turno {
   semResposta?: string;
   erro?: string;
   eventos: string[];
+  /** Ferramentas/APIs chamadas no turno (ProJuris, agenda, revisora, redação). */
+  ferramentas: string[];
   contexto?: unknown;
   ms?: number;
 }
@@ -38,10 +42,12 @@ export interface Turno {
 const CONTATO = '900000001';
 const TELEFONE_TESTE = '11999990001';
 const CONVERSA_ID = 'simulador-ana';
+/** Revisora fictícia (número de teste) usada pela bateria; no sistema real vem do cofre do servidor. */
+export const REVISORA_FICTICIA = '5511977770000';
 
-function conversaInicial(perfil: 'novo' | 'cliente'): Conversa {
+function conversaInicial(perfil: 'novo' | 'cliente', id = CONVERSA_ID, telefone = TELEFONE_TESTE, nome = 'Contato de teste'): Conversa {
   return {
-    id: CONVERSA_ID, nome: 'Contato de teste', cpf: '', telefone: TELEFONE_TESTE, atendimento: 'Telegram (simulação)',
+    id, nome, cpf: '', telefone, atendimento: 'Telegram (simulação)',
     etapa: perfil === 'novo' ? 'inicial' : 'ativo', naoLidas: 0, etapaPipeline: 0, syncs: [], processos: [], documentos: [],
     mensagens: [], timeline: [],
   } as unknown as Conversa;
@@ -79,15 +85,34 @@ export class SimuladorAna {
   agendaFalhando = false;
   turnos: Turno[] = [];
   private seq = 0;
-  constructor(private gerar: Gerador, treino: Treino, perfil: 'novo' | 'cliente' = 'novo') {
+  readonly conversaId: string;
+  readonly telefone: string;
+  readonly nomeContato: string;
+  readonly central: CentralRevisao;
+  projuris: ProjurisFicticio;
+  falhaProjuris: (() => FalhaFicticia | undefined) | undefined;
+  configConsulta: ConfigConsultaProcesso;
+  private redigir: (e: EntradaRedacao) => Promise<string>;
+  private aguardandoAssunto = false;
+  private turnoAtual: Turno | undefined;
+  constructor(private gerar: Gerador, treino: Treino, perfil: 'novo' | 'cliente' = 'novo', opcoes: OpcoesSimulador = {}) {
     this.treino = treino;
-    this.conv = conversaInicial(perfil);
+    this.conversaId = opcoes.conversaId ?? CONVERSA_ID;
+    this.telefone = opcoes.telefone ?? TELEFONE_TESTE;
+    this.nomeContato = opcoes.nome ?? 'Contato de teste';
+    this.conv = conversaInicial(perfil, this.conversaId, this.telefone, this.nomeContato);
     this.agenda = agendaFicticia();
+    this.projuris = opcoes.projuris ?? projurisFicticioPadrao();
+    this.falhaProjuris = opcoes.falhaProjuris;
+    this.configConsulta = opcoes.configConsulta ?? CONFIG_CONSULTA_PADRAO;
+    this.redigir = opcoes.redigir ?? (async () => { throw new Error('Redação indisponível: usa o rascunho padrão.'); });
+    this.central = opcoes.central ?? new CentralRevisao();
   }
 
   reiniciar(perfil: 'novo' | 'cliente') {
-    this.conv = conversaInicial(perfil);
+    this.conv = conversaInicial(perfil, this.conversaId, this.telefone, this.nomeContato);
     this.turnos = [];
+    this.aguardandoAssunto = false;
   }
 
   devolverParaAna() {
@@ -96,11 +121,13 @@ export class SimuladorAna {
 
   // ---------- Google Calendar simulado (mesmas validações do google-calendar.server.ts) ----------
   private ocupados(now: Date, dias: number) {
+    this.turnoAtual?.ferramentas.push('agenda.consultar');
     if (this.agendaFalhando) return null;
     const fim = now.getTime() + dias * 86400000;
     return this.agenda.filter(e => Date.parse(e.fim) > now.getTime() && Date.parse(e.inicio) < fim).map(e => ({ start: e.inicio, end: e.fim }));
   }
   private async reservar(conversaId: string, inicio: string, now: Date, cliente?: { nome: string; telefone: string; tipo: TipoCliente }): Promise<ReservaCalendar> {
+    this.turnoAtual?.ferramentas.push('agenda.reservar');
     if (!conversaId || !Number.isFinite(Date.parse(inicio)) || Date.parse(inicio) <= now.getTime()) throw new Error('Escolha um horário futuro disponível.');
     if (!cliente?.nome.trim() || !telefoneAgenda(cliente.telefone)) throw new Error('Informe nome e telefone do cliente antes de reservar.');
     if (!horarioPermitido(inicio, cliente.tipo)) throw new Error('Horário fora da carteira de atendimento permitida.');
@@ -120,6 +147,7 @@ export class SimuladorAna {
     return { id, inicio, fim, meetUrl };
   }
   private async cancelar(conversaId: string, reserva: ReservaCalendar, autorizado: boolean) {
+    this.turnoAtual?.ferramentas.push('agenda.cancelar');
     if (!autorizado) throw new Error('Cancelamento exige autorização explícita.');
     if (this.agendaFalhando) throw new Error('Google Calendar respondeu 503 (falha simulada).');
     const ev = this.agenda.find(e => e.id === reserva.id);
@@ -143,13 +171,14 @@ export class SimuladorAna {
   private atualizar(fn: (c: Conversa) => Conversa) { this.conv = fn(this.conv); return this.conv; }
 
   /** Equivale ao webhook do Telegram + processarAna. */
-  async receber(texto: string, signal?: AbortSignal): Promise<Turno> {
+  async receber(texto: string, signal?: AbortSignal, arquivo?: string): Promise<Turno> {
     const agora = new Date();
     const id = `telegram:${CONTATO}:${++this.seq}`;
-    const nova = { id, de: 'cliente' as const, texto, hora: agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' }), dataHora: agora.toISOString(), canal: 'telegram', idExterno: String(this.seq) };
+    const nova = { id, de: 'cliente' as const, texto, hora: agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' }), dataHora: agora.toISOString(), ...(arquivo ? { arquivo } : {}), canal: 'telegram', idExterno: String(this.seq) };
     this.atualizar(c => classificarEntrada({ ...iniciarAtendimentoAutomatico(c), mensagens: [...c.mensagens, nova] }));
-    const turno: Turno = { mensagemId: id, textoCliente: texto, eventos: [] };
+    const turno: Turno = { mensagemId: id, textoCliente: texto, eventos: [], ferramentas: [] };
     this.turnos.push(turno);
+    this.turnoAtual = turno;
     const t0 = performance.now();
     await this.processarAna(id, turno, signal);
     turno.ms = Math.round(performance.now() - t0);
@@ -158,9 +187,9 @@ export class SimuladorAna {
 
   private async processarAna(messageId: string, turno: Turno, signal?: AbortSignal) {
     const canal = 'telegram' as const;
-    const id = CONVERSA_ID;
+    const id = this.conversaId;
     const log = (e: string) => turno.eventos.push(e);
-    const telefone = TELEFONE_TESTE;
+    const telefone = this.telefone;
     const c = this.conv;
     const state = { training: this.treino };
     const mode = c.modoIA ?? this.modoIA;
@@ -168,6 +197,9 @@ export class SimuladorAna {
     if (!m || m.iaProcessada) return;
     if (c.agenteAna?.humano || c.agenteAna?.pausa) { turno.semResposta = 'A conversa está com a equipe; a Ana fica em silêncio até ser devolvida.'; return; }
     this.atualizar(cur => ({ ...cur, mensagens: cur.mensagens.map(x => x.id === messageId ? { ...x, iaProcessada: true } : x) }));
+    // Pedido de processo pendente: insistência sem texto ("??") recebe "em conferência" antes da regra de mensagem curta.
+    const pendente = this.central.pendenteDe(this.conversaId);
+    if (pendente && !m.arquivo && apenasInsistencia(m.texto)) { this.enviarAna(TEXTOS_CONSULTA.emConferencia); turno.enviada = TEXTOS_CONSULTA.emConferencia; turno.eventos.push(`Pedido ${pendente.codigo} em conferência: insistência sem texto.`); return; }
     if (mensagemSemResposta(m.texto, !!m.arquivo)) { turno.semResposta = 'Mensagem curta de confirmação ("ok", "obrigado"...): a Ana não responde.'; return; }
     try {
       const history = c.mensagens.filter(x => x.canal === canal).slice(-24).map(x => ({ de: x.de, texto: x.texto, arquivo: x.arquivo ?? '', autor: x.autor ?? '' }));
@@ -224,6 +256,8 @@ export class SimuladorAna {
         }
       }
       const r = aplicarRegrasAna(raw, mode, m.texto, state.training.proibidos, { teste, horarios, ultimaResposta: previous, agendaReal, tipoCliente, nome, telefone, emailPendente: c.etapa === 'documentos' && solicitarEmailPendente(lista as never, email) });
+      // Consulta de processo (fase de testes, com aprovação): mesmo módulo do servidor, ProJuris fictício.
+      if (await this.fluxoProcesso(m.texto, raw.intencao, r, turno)) return;
       if (agendaReal && !selecionado && !horarioPendente && !gerenciarExistente && r.acao === 'enviar' && r.intencao === 'agendamento' && !r.motivo_aprovacao) {
         r.mensagem = listaHorariosAna(horarios, new Date(), repetida);
         if (frustracaoHorariosAna(m.texto) && horarios.length) r.mensagem = r.mensagem.replace(/^[^\n]+/, 'Desculpe! Aqui vão opções diferentes:');
@@ -317,6 +351,110 @@ export class SimuladorAna {
       turno.erro = msg;
       this.atualizar(cur => ({ ...cur, agenteAna: { ...cur.agenteAna, humano: true, erro: msg, operacaoConsulta: undefined, proximoPasso: 'Equipe: conferir falha da Ana antes de retomar.' } }));
       log('Falha: atendimento encaminhado para a equipe (no sistema real a Ana para nesta conversa).');
+    }
+  }
+
+  // ---------- Consulta de processo e revisora (mesma lógica do servidor) ----------
+  enviarAna(texto: string) {
+    this.atualizar(cur => ({ ...cur, mensagens: [...cur.mensagens, newMessage(texto, { autor: 'Ana · assistente virtual', canal: 'telegram', idExterno: `sim-${++this.seq}`, status: 'enviada' })] }));
+  }
+  pausar(motivo: string) {
+    this.atualizar(cur => ({ ...cur, agenteAna: { ...cur.agenteAna, humano: true, proximoPasso: `Equipe: ${motivo}` } }));
+  }
+  entregarAprovado(texto: string) { this.enviarAna(texto); }
+
+  private async fluxoProcesso(texto: string, intencao: string, r: AnaResult, turno: Turno): Promise<boolean> {
+    const pendente = this.central.pendenteDe(this.conversaId);
+    if (pendente) {
+      const resposta = respostaDuranteEspera(texto, intencao, true);
+      if (!resposta) return false;
+      this.enviarAna(resposta);
+      turno.enviada = resposta;
+      turno.final = r;
+      turno.eventos.push(`Pedido ${pendente.codigo} em conferência: sem nova consulta.`);
+      return true;
+    }
+    // Só o pedido explícito de falar com alguém impede a consulta; a marcação do modelo não basta.
+    if (!deveConsultarProcesso({ intencao, texto, encaminharHumano: pedidoHumano(texto), aguardandoAssunto: this.aguardandoAssunto })) return false;
+    const ferramenta = (nome: string) => turno.ferramentas.push(nome);
+    const pj = criarProjurisFicticio(this.projuris, this.falhaProjuris ? { falha: this.falhaProjuris } : {});
+    const portas: PortasConsulta = {
+      agora: () => new Date(),
+      identificar: async t => { ferramenta('projuris.identificar'); return pj.identificar(t); },
+      processosAtivos: async c => { ferramenta('projuris.processos'); return pj.processosAtivos(c); },
+      ultimosAndamentos: async c => { ferramenta('projuris.andamentos'); return pj.ultimosAndamentos(c); },
+      redigir: async e => { ferramenta('ana.redacao'); return this.redigir(e); },
+      codigosExistentes: async () => this.central.codigos(),
+      avisarCliente: async t => { ferramenta('cliente.aviso'); this.enviarAna(t); },
+      enviarRevisora: async t => { ferramenta('revisora.pedido'); this.central.notificar(t); },
+      registrar: async (ev, d) => { turno.eventos.push(`${ev}${d ? `: ${d}` : ''}`); },
+    };
+    const res = await iniciarConsultaProcesso({ conversaId: this.conversaId, telefone: this.telefone, nomeContato: this.conv.nome, textoCliente: texto, assuntoJaPerguntado: this.aguardandoAssunto }, portas, this.configConsulta);
+    this.aguardandoAssunto = res.tipo === 'perguntar_assunto';
+    turno.final = r;
+    if (res.tipo === 'pedido') {
+      this.central.registrar(res.pedido, this);
+      turno.enviada = TEXTOS_CONSULTA.aviso;
+      turno.eventos.push(`Pedido ${res.pedido.codigo} criado e enviado à revisora.`);
+      return true;
+    }
+    const mensagem = res.tipo === 'nao_cliente' ? mensagemNaoCliente(new Date()) : res.mensagem;
+    this.enviarAna(mensagem);
+    turno.enviada = mensagem;
+    if (res.tipo !== 'perguntar_assunto') { this.pausar(res.tipo === 'nao_cliente' ? 'contato sem cadastro no ProJuris pediu notícia de processo' : res.motivo); turno.eventos.push('Conversa passada para a equipe: a Ana fica pausada até ser devolvida.'); }
+    return true;
+  }
+}
+
+export interface OpcoesSimulador {
+  conversaId?: string;
+  telefone?: string;
+  nome?: string;
+  projuris?: ProjurisFicticio;
+  falhaProjuris?: () => FalhaFicticia | undefined;
+  configConsulta?: ConfigConsultaProcesso;
+  /** Redação da notícia (no simulador: Claude com ana-redacao-processo.txt). Sem ela, vale o rascunho padrão. */
+  redigir?: (e: EntradaRedacao) => Promise<string>;
+  central?: CentralRevisao;
+}
+
+export type OrigemRevisora = { canal: 'whatsapp' | 'telegram'; contato: string } | { canal: 'manager'; papeis: string[] };
+
+/** Central da revisora: pedidos de várias conversas, comandos, lembretes e aviso de retorno. */
+export class CentralRevisao {
+  pedidos: { pedido: PedidoProcesso; sim: SimuladorAna }[] = [];
+  mensagensRevisora: string[] = [];
+  registros: string[] = [];
+  constructor(readonly contatoRevisora: string = REVISORA_FICTICIA, readonly cfg: ConfigConsultaProcesso = CONFIG_CONSULTA_PADRAO) {}
+  codigos() { return this.pedidos.map(p => p.pedido.codigo); }
+  notificar(texto: string) { this.mensagensRevisora.push(texto); }
+  registrar(pedido: PedidoProcesso, sim: SimuladorAna) { this.pedidos.push({ pedido, sim }); }
+  pendenteDe(conversaId: string) { return this.pedidos.find(x => x.pedido.conversaId === conversaId && x.pedido.status === 'pendente')?.pedido; }
+
+  async responder(texto: string, origem: OrigemRevisora): Promise<string> {
+    if (!respostaAutorizada(origem, this.contatoRevisora)) { this.registros.push(`Resposta ignorada: origem não autorizada (${origem.canal}).`); return 'ignorado'; }
+    const pendentes = this.pedidos.filter(x => x.pedido.status === 'pendente').map(x => x.pedido.codigo);
+    const c = interpretarRespostaRevisora(texto, pendentes);
+    if (c.acao === 'ambiguo') { this.notificar(c.motivo); return 'ambiguo'; }
+    if (c.acao === 'desconhecido') { this.notificar('Não entendi. Responda "ok CÓDIGO", "corrigir CÓDIGO: texto" ou "não CÓDIGO".'); return 'desconhecido'; }
+    const alvo = this.pedidos.find(x => x.pedido.codigo === c.codigo);
+    if (!alvo) return 'ignorado';
+    const canal = origem.canal === 'manager' ? 'manager' : 'revisora';
+    const d = await aplicarDecisao(alvo.pedido, c, canal === 'manager' ? 'sênior/admin (Manager)' : 'revisora', canal, new Date());
+    alvo.pedido = d.pedido;
+    if (d.enviarCliente) alvo.sim.entregarAprovado(d.enviarCliente);
+    if (d.pausarAna) alvo.sim.pausar('revisora recusou a notícia do processo');
+    this.registros.push(`${c.codigo}: ${d.pedido.status} (${canal}).`);
+    return d.pedido.status;
+  }
+
+  /** Rotina periódica: lembrete à revisora e aviso de retorno ao cliente, conforme o relógio. */
+  verificarPendencias() {
+    const agora = new Date();
+    for (const item of this.pedidos) {
+      const r = pendencias(item.pedido, agora, this.cfg);
+      if (r.lembrete) { this.notificar(`Lembrete: o pedido ${item.pedido.codigo} aguarda sua resposta.`); item.pedido = { ...item.pedido, lembretesEm: [...item.pedido.lembretesEm, agora.toISOString()] }; }
+      if (r.avisoCliente) { item.sim.enviarAna(r.avisoCliente); item.pedido = { ...item.pedido, avisoRetornoEm: agora.toISOString() }; }
     }
   }
 }

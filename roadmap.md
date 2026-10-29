@@ -1,5 +1,27 @@
 # Construção dos módulos Manager ADV
 
+## ProJuris ADV, etapas 2 e 3: consulta com aprovação e bateria automática — 29/10/2026
+- [x] Ana: três trechos autorizados e intenção `consulta_processo`; arquivo de redação; módulo único de consulta e aprovação (prazos com feriado, assunto, validação do rascunho, AND-xxxx com hash, comandos da revisora, lembretes, em conferência).
+- [x] Simulador com ProJuris fictício, central da revisora e registro de ferramentas; 42 cenários na suíte (regressão) e tela "Bateria de testes da Ana" com Ana real, avaliação de 12 critérios e reteste só dos que falharam.
+- [x] Erros achados pela bateria e corrigidos: telefones fictícios sem nono dígito realista (dado de teste); "??" sem resposta durante a espera (regra de negócio).
+- [ ] Propostas aguardando a Dra.: exemplo do prompt (linhas 164-166) e passagem atual sem feriados.
+- [ ] Ligar o fluxo no servidor real (webhook, revisora no WhatsApp, Manager com Aprovar/Corrigir/Recusar, rotina de lembretes) e Telegram de teste; etapa 4: cadastros.
+
+
+## ProJuris ADV, etapa 1: base segura — 29/10/2026
+- [x] Plano, existente e bloqueios apresentados; Dra. autorizou alterar três trechos da Ana e criar o arquivo de redação, revisora com número próprio no servidor e Telegram reativado só para testes (etapas seguintes).
+- [x] `.env` protegido no .gitignore; Integrações exigem PROJURIS_CLIENT_ID e PROJURIS_CLIENT_SECRET; verificação de prontidão só autentica (sênior/admin).
+- [x] Cliente ProJuris no servidor com lista fechada de consultas, token em cache, fila de 480/min, backoff, tempo-limite e 403 sem contorno; identificação por telefone principal; filtros de processo ativo, cliente, andamento privado e segredo de justiça.
+- [ ] Teste de conexão pela Dra. com `tools/projuris-teste-conexao` (este ambiente não alcança o ProJuris); chave recriada antes.
+- [ ] Etapa 2: aprovação de informações de processo; etapa 3: simulador; etapa 4: cadastros pela equipe.
+
+
+## WhatsApp sem números — 29/10/2026
+- [x] Confirmado na documentação oficial do UltraMsg que não há listas interativas nem botões; decisão da Dra.: continuar no UltraMsg, com opções em texto e sem números.
+- [x] Horários pelo WhatsApp saem uma única vez, com marcadores; retirados a segunda lista numerada e o "Responda com o número do horário escolhido". Horários ausentes do texto da equipe entram com marcador. 363 testes aprovados, compilação limpa.
+- [ ] Publicar e conferir com mensagem real de um dos números autorizados.
+- [ ] Lista interativa real depende de migrar para a API oficial do WhatsApp (decisão futura da Dra.).
+
 ## UltraMsg restrito — 27/10/2026
 - [x] Retirar Telegram dos controles e recebimento (410); recebimento removido no Telegram, contato antigo bloqueado, históricos e Claude preservados.
 - [x] Restringir entrada, liberação e envio UltraMsg a 11999600306 e 11942074361; entrada geral fechada e outros contatos bloqueados. 357 testes aprovados e compilação limpa.

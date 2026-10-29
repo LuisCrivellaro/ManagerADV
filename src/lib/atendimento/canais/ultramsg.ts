@@ -9,10 +9,33 @@ export function numeroWhatsApp(valor: string): string {
   return valor.replace(/@.*$/, '').replace(/\D/g, '');
 }
 
-/** Botões não existem no UltraMsg: os horários viram lista numerada para o cliente responder. */
-export function textoComOpcoes(texto: string, botoes?: { texto: string }[]): string {
+/**
+ * O horário já aparece no texto? Procura uma linha com a data (dd/mm) cujo primeiro horário (9h, 9h30) é o início,
+ * em Brasília. Só o primeiro conta: em "9h30 às 10h", o "10h" é o fim de outro horário, não uma opção.
+ */
+function horarioNoTexto(texto: string, iso: string): boolean {
+  const t = Date.parse(iso);
+  if (!Number.isFinite(t)) return false;
+  const p = Object.fromEntries(new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+    .formatToParts(new Date(t)).map(x => [x.type, x.value]));
+  const data = `${p['day']}/${p['month']}`;
+  const inicio = `${Number(p['hour'])}h${p['minute'] === '00' ? '' : p['minute']}`;
+  return texto.split('\n').some(linha => linha.includes(data) && /(?<!\d)\d{1,2}h(?:\d{2})?(?!\d)/.exec(linha)?.[0] === inicio);
+}
+
+/**
+ * Listas interativas e botões não existem no UltraMsg (documentação oficial conferida em 29/10/2026).
+ * Os horários vão uma única vez, com marcadores e sem número; o cliente responde com dia, hora ou ordem.
+ * Se o texto já traz um horário, ele não é repetido; os que faltarem entram ao final como marcadores.
+ */
+export function textoComOpcoes(texto: string, botoes?: { texto: string; dados?: string }[]): string {
   if (!botoes?.length) return texto;
-  return `${texto}\n\n${botoes.map((b, i) => `${i + 1}. ${b.texto}`).join('\n')}\n\nResponda com o número do horário escolhido.`;
+  const faltam = botoes.filter(b => {
+    const iso = b.dados?.startsWith('slot:') ? b.dados.slice('slot:'.length) : undefined;
+    return !iso || !horarioNoTexto(texto, iso);
+  });
+  if (!faltam.length) return texto;
+  return `${texto}\n\n${faltam.map(b => `• ${b.texto.replace(/^🗓️\s*/u, '')}`).join('\n')}`;
 }
 
 export async function enviarTextoUltramsg(numero: string, texto: string, cred: { instancia: string; token: string }): Promise<ResultadoEnvio> {

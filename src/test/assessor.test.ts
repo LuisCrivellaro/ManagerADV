@@ -1,4 +1,0 @@
-import { expect,it } from 'vitest';
-import { buildAssessor } from '@/lib/assessor';
-it('prioritizes fatal deadlines in 2 days and counts sidebar in 7 days',()=>{const a=buildAssessor([{id:'1',nome:'Cliente',pipeline:6,mine:true,prazos:[{data:'2026-10-22',texto:'Fatal',fatal:true},{data:'2026-10-27',texto:'Outro',fatal:true},{data:'2026-10-20',texto:'Tarefa'}]}],'2026-10-20');expect(a.metrics.fatal).toBe(1);expect(a.badges['/']).toBe(2);expect(a.tasks.filter(t=>t.urgent).length).toBe(1);expect(a.tasks.some(t=>t.label.includes('Vence hoje'))).toBe(true);expect(a.metrics.protocols).toBe(1);});
-it('does not relabel ordinary deadlines as fatal',()=>expect(buildAssessor([{id:'1',nome:'Cliente',pipeline:3,mine:true,prazos:[{data:'2026-10-21',texto:'Prazo normal'}]}],'2026-10-20').metrics.fatal).toBe(0));

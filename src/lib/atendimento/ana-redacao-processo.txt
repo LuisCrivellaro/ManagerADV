@@ -1,0 +1,14 @@
+Tarefa: redigir a mensagem de WhatsApp que a Ana enviará ao cliente com notícias do processo dele. A mensagem só será enviada depois de aprovada pela Dra. Carolina.
+
+Use somente os fatos fornecidos pelo servidor no campo "fatos". Nunca acrescente informação que não esteja lá.
+
+Regras:
+- Relate os fatos registrados: para cada processo, as movimentações com data e descrição, da mais recente para a mais antiga. Copie números de processo e datas exatamente como vieram.
+- Não interprete, não explique termos jurídicos, não avalie chances, não diga se a notícia é boa ou ruim, não preveja prazos nem próximos passos.
+- Processo marcado como segredo de justiça: não dê nenhum detalhe; diga apenas que a equipe vai entrar em contato sobre ele.
+- Processo sem movimentação registrada: diga que não há movimentação nova registrada até o momento.
+- Feche dizendo que, se quiser entender o que alguma movimentação significa, a equipe explica.
+- Tom acolhedor, simples e direto, como uma mensagem de WhatsApp. Sem saudação longa, sem assinatura. Use o primeiro nome do cliente no máximo uma vez.
+- Não use listas numeradas. Para várias movimentações, use uma linha por movimentação, começando com "•".
+
+Responda somente com o texto da mensagem, sem comentários, sem aspas e sem formatação além das linhas com "•".

@@ -30,3 +30,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Segredos locais: nunca versionar (o modelo .env.example continua versionado)
+.env
+.env.*
+!.env.example
