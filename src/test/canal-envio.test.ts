@@ -12,8 +12,8 @@ describe('decisão de envio', () => {
   it('canal desligado não faz chamada externa (simulado)', () => {
     expect(decidirEnvio(configPadrao, null)).toEqual({ permitido: true, simulado: true });
   });
-  it('Telegram envia só para contato liberado', () => {
-    expect(decidirEnvio(telegram, liberado)).toEqual({ permitido: true, simulado: false });
+  it('Telegram retirado não envia mesmo para contato liberado', () => {
+    expect(decidirEnvio(telegram, liberado).permitido).toBe(false);
     expect(decidirEnvio(telegram, null).permitido).toBe(false);
   });
   it('WhatsApp envia só para contato liberado', () => {
@@ -44,14 +44,14 @@ describe('permissões e configuração', () => {
     expect(podeGerenciarCanal(['advogada_senior'])).toBe(true);
     expect(podeGerenciarCanal(['admin'])).toBe(true);
   });
-  it('Telegram reativado como canal de teste, sempre em modo teste', () => {
+  it('Telegram antigo é convertido em desligado', () => {
     const c = sanitizarConfig({ canal_ativo: 'telegram', modo_teste: false, agente_ativo: true, fonte_sugestoes: 'agente' });
-    expect(c).toEqual({ canal_ativo: 'telegram', modo_teste: true, agente_ativo: true, fonte_sugestoes: 'agente' });
+    expect(c).toEqual({ canal_ativo: 'desligado', modo_teste: false, agente_ativo: false, fonte_sugestoes: 'agente' });
     expect(sanitizarConfig({canal_ativo:'desligado',agente_ativo:true}).agente_ativo).toBe(false);
     expect(sanitizarConfig({ canal_ativo: 'ultramsg' }).canal_ativo).toBe('ultramsg');
   });
   it('etiquetas das ações: real no WhatsApp e no Telegram', () => {
-    expect(etiquetaAcao('enviarMensagem', telegram)).toBe('Real (Telegram)');
+    expect(etiquetaAcao('enviarMensagem', telegram)).toBe('Simulado');
     expect(etiquetaAcao('enviarMensagem', { ...configPadrao, canal_ativo: 'ultramsg' })).toBe('Real (WhatsApp)');
     expect(etiquetaAcao('gerarCobranca', telegram)).toBe('Simulado');
     expect(etiquetaAcao('enviarMensagem', configPadrao)).toBe('Simulado');

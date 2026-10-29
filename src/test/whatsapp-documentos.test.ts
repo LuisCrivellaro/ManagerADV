@@ -16,7 +16,7 @@ describe('documentos recebidos pelo WhatsApp', () => {
     mocks.db.rpc.mockResolvedValue({ error: null });
     mocks.db.storage.from.mockReturnValue({ upload: vi.fn(async () => ({ error: null })) });
     mocks.db.from.mockImplementation((table: string) => {
-      const value = () => ({ error: null, data: table === 'atendimento_canal_config' ? { canal_ativo: 'ultramsg' } : table === 'atendimento_contatos_teste' ? [{ id: 'contato', conversa_id: 'caso', contato_externo: '5511999990001', status: 'liberado' }] : table === 'casos' ? { id: 'caso', owner_id: 'owner', dados: conversa } : null });
+      const value = () => ({ error: null, data: table === 'atendimento_canal_config' ? { canal_ativo: 'ultramsg' } : table === 'atendimento_contatos_teste' ? [{ id: 'contato', conversa_id: 'caso', contato_externo: '5511999600306', status: 'liberado' }] : table === 'casos' ? { id: 'caso', owner_id: 'owner', dados: conversa } : null });
       const q: any = { select: () => q, eq: () => q, maybeSingle: async () => value(), then: (resolve: any) => Promise.resolve(value()).then(resolve) };
       return q;
     });
@@ -24,10 +24,10 @@ describe('documentos recebidos pelo WhatsApp', () => {
     mocks.analisar.mockResolvedValue({ ok: true });
     vi.stubGlobal('fetch', vi.fn(async () => new Response(new Uint8Array([1,2,3]), { headers: { 'content-type': 'image/png' } })));
     const post = (Route as unknown as { server: { handlers: { POST: (args: { request: Request }) => Promise<Response> } } }).server.handlers.POST;
-    const request = () => new Request('http://localhost:8080/api/public/atendimento/whatsapp?s=test-secret', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ event_type: 'message_received', data: { id: 'arquivo-1', from: '5511999990001@c.us', type: 'image', media: 'https://example.test/rg.png', filename: 'rg.png' } }) });
+    const request = () => new Request('http://localhost:8080/api/public/atendimento/whatsapp?s=test-secret', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ event_type: 'message_received', data: { id: 'arquivo-1', from: '5511999600306@c.us', type: 'image', media: 'https://example.test/rg.png', filename: 'rg.png' } }) });
     expect((await post({ request: request() })).status).toBe(200);
     expect(conversa.mensagens[0]?.path).toMatch(/^owner\/caso\//);
-    expect(mocks.analisar).toHaveBeenCalledWith(mocks.db, 'caso', 'owner', 'ultramsg:5511999990001:arquivo-1');
+    expect(mocks.analisar).toHaveBeenCalledWith(mocks.db, 'caso', 'owner', 'ultramsg:5511999600306:arquivo-1');
     expect((await post({ request: request() })).status).toBe(200);
     expect(mocks.analisar).toHaveBeenCalledOnce(); expect(conversa.mensagens).toHaveLength(1);
   });

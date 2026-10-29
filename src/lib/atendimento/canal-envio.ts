@@ -47,7 +47,8 @@ export interface DecisaoEnvio {
 /** Decide para onde vai a mensagem. Com canal desligado nenhuma chamada externa acontece. */
 export function decidirEnvio(config: CanalConfig, contato: Pick<ContatoTeste, 'status'> | null): DecisaoEnvio {
   if (config.canal_ativo === 'desligado') return { permitido: true, simulado: true };
-  if (config.canal_ativo === 'ultramsg' || config.canal_ativo === 'telegram') {
+  if (config.canal_ativo === 'telegram') return { permitido: false, simulado: false, motivo: 'Telegram retirado do atendimento.' };
+  if (config.canal_ativo === 'ultramsg') {
     if (!contato || contato.status !== 'liberado') {
       return { permitido: false, simulado: false, motivo: 'Modo teste: contato não liberado. Nada foi enviado.' };
     }
@@ -63,7 +64,7 @@ export function podeGerenciarCanal(roles: string[]): boolean {
 
 /** WhatsApp é o único canal real; configurações antigas de Telegram ficam desligadas. */
 export function sanitizarConfig(entrada: Partial<CanalConfig>): CanalConfig {
-  const canal: CanalAtivo = entrada.canal_ativo === 'ultramsg' || entrada.canal_ativo === 'telegram' ? entrada.canal_ativo : 'desligado';
+  const canal: CanalAtivo = entrada.canal_ativo === 'ultramsg' ? entrada.canal_ativo : 'desligado';
   return {
     canal_ativo: canal,
     modo_teste: canal !== 'desligado' ? true : entrada.modo_teste ?? true,
@@ -87,5 +88,5 @@ export const acoesMensagem = ['enviarMensagem', 'enviarHorarios', 'solicitarDocu
 
 export function etiquetaAcao(acao: string, config: CanalConfig): 'Real (WhatsApp)' | 'Real (Telegram)' | 'Simulado' {
   if (!(acoesMensagem as readonly string[]).includes(acao)) return 'Simulado';
-  return config.canal_ativo === 'ultramsg' ? 'Real (WhatsApp)' : config.canal_ativo === 'telegram' ? 'Real (Telegram)' : 'Simulado';
+  return config.canal_ativo === 'ultramsg' ? 'Real (WhatsApp)' : 'Simulado';
 }

@@ -1,0 +1,5 @@
+# Attendance server and domain rules
+
+- Intake defaults to automatic, preserving modes/pauses. Active `ana-prompt.txt` and `ana-restrictions.txt` supply identity with owner training; `ana-scheduling.ts` validates intent, offers and pending-slot consent. Why: no forced greeting or unsafe booking.
+- Ana inference uses `ana.functions.ts` with the uploaded `claudeComoSample` adapter; UltraMsg uses channel-validated orchestration, consent and released conversation-owned destinations. Telegram is retired and production restrictions apply before incoming processing and outgoing provider calls. Why: preserve operational safety and provider billing.
+- Ana scope is scheduling-only for now: she books, reschedules and cancels; team-only subjects (process, documents, contract, payment, hearings, deadlines) hand off with `encaminhar_humano` and the server's "só dos agendamentos" handoff text; `processo` intent still falls back to draft. Fictional slots are never stored as offers. Why: avoid triage without legal review and keep first offers correct.

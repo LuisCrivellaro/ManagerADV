@@ -1,5 +1,6 @@
 // Adaptador UltraMsg (WhatsApp). Token e instância vêm só do servidor e nunca aparecem em logs ou erros.
 import type { AdaptadorCanal, ResultadoEnvio } from './tipos';
+import { numeroUltraMsgPermitido } from '../production-channel';
 
 const TIMEOUT_MS = 15000;
 
@@ -15,6 +16,7 @@ export function textoComOpcoes(texto: string, botoes?: { texto: string }[]): str
 }
 
 export async function enviarTextoUltramsg(numero: string, texto: string, cred: { instancia: string; token: string }): Promise<ResultadoEnvio> {
+  if (!numeroUltraMsgPermitido(numero)) return { ok: false, erro: 'Número não autorizado nesta fase de produção.' };
   if (!cred.instancia || !cred.token) return { ok: false, erro: 'WhatsApp não configurado.' };
   const ctrl = new AbortController();
   const limite = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
