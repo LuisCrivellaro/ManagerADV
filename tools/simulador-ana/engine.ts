@@ -4,7 +4,7 @@
 import type { Conversa } from '@/lib/mock-data';
 import { newMessage, chosenSlot, formatarHorarioCliente } from '@/lib/atendimento';
 import { escolherReservaAna, idReservaCalendar, intervaloLivre, type ReservaCalendar } from '@/lib/atendimento/calendar-booking';
-import { aplicarRegrasAna, expedienteAna, mensagemSemResposta, aceitarRespostaAna, respostaAgendaTeste, priorizarAgendamentoAna, type AnaResult } from '@/lib/atendimento/ana-rules';
+import { saudacaoClienteNovo, aplicarRegrasAna, expedienteAna, mensagemSemResposta, aceitarRespostaAna, respostaAgendaTeste, priorizarAgendamentoAna, type AnaResult } from '@/lib/atendimento/ana-rules';
 import { etiquetaConversa, identificarTipoCliente, classificarEntrada, telefoneAgenda, type TipoCliente } from '@/lib/atendimento/intake-rules';
 import { iniciarAtendimentoAutomatico } from '@/lib/atendimento/initial-attendance';
 import { horarioPermitido, DURACAO_REUNIAO } from '@/lib/atendimento/schedule-rules';
@@ -255,7 +255,7 @@ export class SimuladorAna {
           horarios = opcoes.slots; semPeriodo = opcoes.semPeriodo;
         }
       }
-      const r = aplicarRegrasAna(raw, mode, m.texto, state.training.proibidos, { teste, horarios, ultimaResposta: previous, agendaReal, tipoCliente, nome, telefone, emailPendente: c.etapa === 'documentos' && solicitarEmailPendente(lista as never, email) });
+      const r = saudacaoClienteNovo(aplicarRegrasAna(raw, mode, m.texto, state.training.proibidos, { teste, horarios, ultimaResposta: previous, agendaReal, tipoCliente, nome, telefone, emailPendente: c.etapa === 'documentos' && solicitarEmailPendente(lista as never, email) }), m.texto, { apresentado: !!c.agenteAna?.apresentado, tipoCliente });
       // Consulta de processo (fase de testes, com aprovação): mesmo módulo do servidor, ProJuris fictício.
       if (await this.fluxoProcesso(m.texto, raw.intencao, r, turno)) return;
       if (agendaReal && !selecionado && !horarioPendente && !gerenciarExistente && r.acao === 'enviar' && r.intencao === 'agendamento' && !r.motivo_aprovacao) {

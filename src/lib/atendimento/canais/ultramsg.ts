@@ -1,6 +1,7 @@
 // Adaptador UltraMsg (WhatsApp). Token e instância vêm só do servidor e nunca aparecem em logs ou erros.
 import type { AdaptadorCanal, ResultadoEnvio } from './tipos';
 import { numeroUltraMsgPermitido } from '../production-channel';
+import { chaveTelefone } from '../../projuris/telefone';
 
 const TIMEOUT_MS = 15000;
 
@@ -40,6 +41,20 @@ export function textoComOpcoes(texto: string, botoes?: { texto: string; dados?: 
 
 export async function enviarTextoUltramsg(numero: string, texto: string, cred: { instancia: string; token: string }): Promise<ResultadoEnvio> {
   if (!numeroUltraMsgPermitido(numero)) return { ok: false, erro: 'Número não autorizado nesta fase de produção.' };
+  return enviarSemLista(numero, texto, cred);
+}
+
+/**
+ * Envio à revisora configurada no servidor (REVISORA_WHATSAPP): a única exceção à lista de números liberados.
+ * Só aceita o número do segredo; clientes continuam passando por enviarTextoUltramsg.
+ */
+export async function enviarTextoRevisora(texto: string, env: Record<string, string | undefined> = process.env): Promise<ResultadoEnvio> {
+  const revisora = env['REVISORA_WHATSAPP']?.trim() ?? '';
+  if (!chaveTelefone(revisora)) return { ok: false, erro: 'Revisora não configurada.' };
+  return enviarSemLista(revisora, texto, { instancia: env['ULTRAMSG_INSTANCE_ID']?.trim() ?? '', token: env['ULTRAMSG_TOKEN']?.trim() ?? '' });
+}
+
+async function enviarSemLista(numero: string, texto: string, cred: { instancia: string; token: string }): Promise<ResultadoEnvio> {
   if (!cred.instancia || !cred.token) return { ok: false, erro: 'WhatsApp não configurado.' };
   const ctrl = new AbortController();
   const limite = setTimeout(() => ctrl.abort(), TIMEOUT_MS);

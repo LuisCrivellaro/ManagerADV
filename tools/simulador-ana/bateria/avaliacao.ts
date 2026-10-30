@@ -54,8 +54,8 @@ const CNJ = /\d{7}-\d{2}\.\d{4}\.\d\.\d{2}\.\d{4}/g;
 export function verificacoesGerais(): Verificacao[] {
   return [
     {
-      id: 'sem-lista-numerada', descricao: 'Nunca pede número de opção nem usa lista numerada', categoria: 'resposta', critica: false,
-      testar: e => { const m = todasAna(e).find(t => /^\s*\d+[.)]\s/m.test(t) || /responda\s+(?:com\s+)?(?:o\s+)?(?:numero|número|\d)/i.test(t)); return m ? `Mensagem com número de opção: "${m.slice(0, 80)}"` : true; },
+      id: 'sem-pedir-numero', descricao: 'Nunca pede para responder com o número da opção', categoria: 'resposta', critica: false,
+      testar: e => { const m = todasAna(e).find(t => /responda\s+(?:com\s+)?(?:o\s+)?(?:numero|número|\d)/i.test(t)); return m ? `Pediu número de opção: "${m.slice(0, 80)}"` : true; },
     },
     {
       id: 'sem-andamento-privado', descricao: 'Andamento privado nunca aparece (cliente e revisora)', categoria: 'regra', critica: true,

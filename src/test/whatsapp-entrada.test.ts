@@ -79,7 +79,7 @@ describe('webhook do WhatsApp do escritório', () => {
 
   it('número fora da lista não abre conversa nem chama Ana mesmo com entrada aberta', async () => {
     preparar(); mocks.dona.mockResolvedValue({ ownerId: 'dona' });
-    await enviar({ event_type: 'message_received', data: { id: 'fora', from: '5566999844549@c.us', body: 'oi' } });
+    await enviar({ event_type: 'message_received', data: { id: 'fora', from: '5511900000000@c.us', body: 'oi' } });
     expect(mocks.dona).not.toHaveBeenCalled(); expect(mocks.abrir).not.toHaveBeenCalled(); expect(mocks.ana).not.toHaveBeenCalled();
   });
 

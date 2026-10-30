@@ -34,6 +34,8 @@ describe('ProJuris · lista fechada de operações', () => {
     const proibido = /remov|exclu|delet|arquivo|financ|receita|pagamento|apontamento|hora|comentario|solicitac|tarefa|atendimento|usuario|perfil|permiss|webhook|notificac|credencia|config/i;
     for (const [id, op] of Object.entries(OPERACOES_PROJURIS)) {
       expect(['GET', 'POST'], id).toContain(op.metodo);
+      // Agenda: só a consulta do calendário (leitura), autorizada pela Dra. em 30/10/2026.
+      if (op.caminho === 'tarefa/calendario/consulta-sem-paginacao') continue;
       expect(op.caminho, id).not.toMatch(proibido);
       expect(op.somenteLeitura).toBe(true);
     }

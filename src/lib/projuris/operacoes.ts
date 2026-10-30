@@ -20,6 +20,7 @@ export const OPERACOES_PROJURIS = {
   'pessoa.consultaCompleta': { metodo: 'POST', caminho: 'pessoa/consulta-completa', somenteLeitura: true, descricao: 'Busca com dados completos (telefones)' },
   'processo.consultaCompleta': { metodo: 'POST', caminho: 'processo/consulta-completa', somenteLeitura: true, descricao: 'Processos por envolvido e situação' },
   'processo.andamentos': { metodo: 'GET', caminho: 'processo/{codigo}/andamento/consulta', somenteLeitura: true, descricao: 'Andamentos de um processo' },
+  'tarefa.calendario': { metodo: 'POST', caminho: 'tarefa/calendario/consulta-sem-paginacao', somenteLeitura: true, descricao: 'Agenda (compromissos, audiências e prazos), só leitura' },
 } as const satisfies Record<string, OperacaoProjuris>;
 
 export type IdOperacaoProjuris = keyof typeof OPERACOES_PROJURIS;

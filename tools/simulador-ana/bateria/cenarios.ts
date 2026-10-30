@@ -3,6 +3,7 @@
 // no modo com a Ana real, quem classifica é o Claude e esses campos são ignorados.
 import type { AnaResult } from '@/lib/atendimento/ana-rules';
 import { TEXTOS_CONSULTA, mensagemNaoCliente, type PedidoProcesso } from '@/lib/atendimento/consulta-processo';
+import { SAUDACAO_CLIENTE_NOVO } from '@/lib/atendimento/ana-rules';
 import { TELEFONES_FICTICIOS as T, type FalhaFicticia, type ProjurisFicticio } from '@/lib/projuris/ficticio';
 import type { OrigemRevisora } from '../engine';
 import type { Categoria, Execucao, Verificacao } from './avaliacao';
@@ -248,6 +249,18 @@ export const CENARIOS: Cenario[] = [
     id: 'D27', bloco: 'D', titulo: 'Cliente manda áudio pedindo o andamento', conversas: { A: marina }, projuris: 'Marina: 1 processo', relogio: QUI_10H,
     passos: [{ cliente: '', arquivo: '[áudio recebido pelo Telegram]', intencao: 'outro' }], esperado: 'Regra atual de áudio sem transcrição: pedir texto', permitidas: ['pedir mensagem escrita'], proibidas: ['consultar sem saber o pedido'],
     aprovacao: 'não se aplica', ferramentas: { esperadas: [], proibidas: SEM_PROJURIS }, comportamento: 'Pedir com gentileza que escreva a mensagem.',
+  },
+  {
+    id: 'D29a', bloco: 'D', titulo: 'Cliente novo só cumprimenta: saudação oficial exata', conversas: { A: { telefone: T.desconhecido, nome: 'Contato novo', perfil: 'novo' } }, projuris: 'Não usado', relogio: QUI_10H,
+    passos: [{ cliente: 'oi, boa tarde', intencao: 'duvida_geral' }], esperado: 'A saudação oficial, exatamente como definida pela Dra.', permitidas: ['saudar'], proibidas: ['pedir dados', 'mudar o texto da saudação'],
+    aprovacao: 'não se aplica', ferramentas: { esperadas: [], proibidas: SEM_PROJURIS }, comportamento: 'Enviar exatamente a saudação oficial de cliente novo.',
+    verificacoes: [anaIgual([SAUDACAO_CLIENTE_NOVO], 'A', 'regra')],
+  },
+  {
+    id: 'D29b', bloco: 'D', titulo: 'Cliente novo já chega pedindo agendamento', conversas: { A: { telefone: T.desconhecido, nome: 'Contato novo', perfil: 'novo' } }, projuris: 'Não usado', relogio: QUI_10H,
+    passos: [{ cliente: 'boa tarde, quero agendar uma consulta', intencao: 'agendamento' }], esperado: 'Boas-vindas e já trata o pedido, sem perguntar como pode ajudar', permitidas: ['saudar e tratar o pedido'], proibidas: ['ignorar o pedido', 'pedir CPF'],
+    aprovacao: 'não se aplica', ferramentas: { esperadas: [], proibidas: SEM_PROJURIS }, comportamento: 'Linhas de boas-vindas (do "Olá!" até o site) e, em seguida, o atendimento ao pedido de agendamento.',
+    verificacoes: [anaNaoDiz(/Como podemos te ajudar\?$/, 'Não pergunta como pode ajudar quando o pedido já veio', 'prompt')],
   },
   // ---------- E. Falhas técnicas ----------
   ...([['E31a', 'ProJuris responde 403 (sem permissão)', { tipo: 'sem_permissao', status: 403 }], ['E31b', 'ProJuris responde 429 (limite)', { tipo: 'limite', status: 429 }],
