@@ -1,14 +1,38 @@
-Tarefa: redigir a mensagem de WhatsApp que a Ana enviará ao cliente com notícias do processo dele. A mensagem só será enviada depois de aprovada pela Dra. Carolina.
+Tarefa: redigir a mensagem de WhatsApp que a Ana enviará ao cliente com notícias do processo dele. A mensagem só será enviada depois de aprovada pela revisora.
 
 Use somente os fatos fornecidos pelo servidor no campo "fatos". Nunca acrescente informação que não esteja lá.
 
-Regras:
-- Relate os fatos registrados: para cada processo, as movimentações com data e descrição, da mais recente para a mais antiga. Copie números de processo e datas exatamente como vieram.
-- Não interprete, não explique termos jurídicos, não avalie chances, não diga se a notícia é boa ou ruim, não preveja prazos nem próximos passos.
-- Processo marcado como segredo de justiça: não dê nenhum detalhe; diga apenas que a equipe vai entrar em contato sobre ele.
-- Processo sem movimentação registrada: diga que não há movimentação nova registrada até o momento.
-- Feche dizendo que, se quiser entender o que alguma movimentação significa, a equipe explica.
-- Tom acolhedor, simples e direto, como uma mensagem de WhatsApp. Sem saudação longa, sem assinatura. Use o primeiro nome do cliente no máximo uma vez.
-- Não use listas numeradas. Para várias movimentações, use uma linha por movimentação, começando com "•".
+Use EXATAMENTE este modelo, trocando só as variáveis entre chaves:
 
-Responda somente com o texto da mensagem, sem comentários, sem aspas e sem formatação além das linhas com "•".
+Olá, {nome}! 😊
+
+Consultei seu processo em nosso sistema e trouxe uma atualização para você.
+
+📄 Andamento do processo:
+{andamento_atual}
+
+📅 Última movimentação:
+{data_movimentacao}
+
+O que isso significa?
+{explicacao_simplificada}
+
+Nossa equipe continua acompanhando seu processo e, caso haja alguma novidade ou providência necessária, entraremos em contato.
+
+Se tiver alguma dúvida, estou à disposição para ajudar!
+
+Atenciosamente,
+Equipe CS Advocacia
+www.carolinasantos.com.br
+
+Regras das variáveis:
+- {nome}: o primeiro_nome recebido.
+- {andamento_atual}: a PRIMEIRA movimentação da lista (a mais recente), com a descrição exatamente como veio, sem resumir nem corrigir.
+- {data_movimentacao}: a data dessa movimentação exatamente como veio (dd/mm/aaaa).
+- {explicacao_simplificada}: se a movimentação trouxer "simplificacao_projuris", copie esse texto. Se não trouxer, escreva uma ou duas frases simples sobre O QUE a movimentação é, sem avaliar chances, sem dizer se é boa ou ruim, sem prever prazos ou próximos passos e sem prometer resultado.
+- Mais de um processo: uma única saudação e um único fechamento; repita os blocos 📄, 📅 e "O que isso significa?" para cada processo, escrevendo o assunto entre parênteses logo depois de "Andamento do processo" (ex.: "📄 Andamento do processo (Pensão alimentícia):").
+- Processo sem movimentação: em {andamento_atual} escreva "Ainda não há movimentação registrada." e omita o bloco 📅 e o bloco "O que isso significa?".
+- Processo em segredo de justiça: não escreva nenhum bloco para ele; escreva apenas a frase "Sobre um dos seus processos, nossa equipe vai entrar em contato com você."
+- Copie números de processo e datas exatamente como vieram. Não use listas numeradas.
+
+Responda somente com o texto da mensagem, sem comentários e sem aspas.

@@ -89,7 +89,9 @@ export function andamentoDe(r: Obj): AndamentoPJ | undefined {
   if (!codigo || !descricao) return undefined;
   const data = typeof r['dataAndamento'] === 'number' ? String(r['dataAndamento']) : txt(r['dataAndamento']);
   const hora = txt(r['horaAndamento']), tipo = txt(r['nomeTipoAndamento']);
-  return { codigo, descricao, privado: r['privado'] !== false, ...(data ? { data } : {}), ...(hora ? { hora } : {}), ...(tipo ? { tipo } : {}) };
+  // Simplificação do próprio ProJuris, quando a resposta trouxer.
+  const simplificacao = txt(r['simplificacao'] ?? r['descricaoSimplificada'] ?? r['textoSimplificado']);
+  return { codigo, descricao, privado: r['privado'] !== false, ...(simplificacao ? { simplificacao } : {}), ...(data ? { data } : {}), ...(hora ? { hora } : {}), ...(tipo ? { tipo } : {}) };
 }
 
 /** Código da situação "Ativo" vindo da consulta tipo; sem resposta única, não adivinha. */

@@ -14,8 +14,8 @@ export interface ProcessoPJ {
   segredoJustica: boolean;
   envolvidos: EnvolvidoPJ[];
 }
-export interface AndamentoPJ { codigo: number; data?: string; hora?: string; tipo?: string; descricao: string; privado: boolean }
-export interface AndamentoLegivel { data: string; hora?: string; tipo?: string; descricao: string }
+export interface AndamentoPJ { codigo: number; data?: string; hora?: string; tipo?: string; descricao: string; privado: boolean; simplificacao?: string }
+export interface AndamentoLegivel { data: string; hora?: string; tipo?: string; descricao: string; simplificacao?: string }
 
 const FUSO = 'America/Sao_Paulo';
 
@@ -78,7 +78,7 @@ export function ultimosAndamentosPublicos(andamentos: AndamentoPJ[], n = 3): And
     .slice(0, n)
     .map(a => {
       const hora = horaLegivel(a.hora);
-      return { data: dataLegivel(a.data)!, ...(hora ? { hora } : {}), ...(a.tipo ? { tipo: a.tipo } : {}), descricao: a.descricao.trim() };
+      return { data: dataLegivel(a.data)!, ...(hora ? { hora } : {}), ...(a.tipo ? { tipo: a.tipo } : {}), descricao: a.descricao.trim(), ...(a.simplificacao?.trim() ? { simplificacao: a.simplificacao.trim() } : {}) };
     });
 }
 

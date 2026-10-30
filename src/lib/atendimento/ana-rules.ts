@@ -15,6 +15,14 @@ export const anaSchema = z.object({
 });
 export type AnaResult = z.infer<typeof anaSchema>;
 export interface AnaState {
+  pedidosProcesso?: import('./consulta-processo').PedidoProcesso[] | undefined;
+  aguardandoAssuntoProcesso?: boolean;
+  /** Vínculo com a pessoa do ProJuris (gravado pelo servidor; pendente até a equipe confirmar). */
+  vinculoProjuris?: import('../projuris/vinculo').VinculoProjuris | undefined;
+  aguardandoCpfProcesso?: boolean;
+  /** Pergunta de processo guardada enquanto o cadastro é localizado pelo CPF. */
+  perguntaProcessoPendente?: string | undefined;
+  consultaProcessoEmCurso?: { mensagemId: string; desde: string } | undefined;
   tipoCliente?: TipoCliente | undefined; telefone?: string | undefined;
   apresentado?: boolean; humano?: boolean; urgente?: boolean; motivo?: string; proximoPasso?: string;
   dados?: AnaResult['dados_coletados']; resultado?: AnaResult; erro?: string | undefined; pausa?: boolean;

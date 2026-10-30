@@ -1,6 +1,7 @@
 import { gerarHorarios, horarioPermitido, feriadoNacional } from './schedule-rules';
 import { intervaloLivre } from './calendar-booking';
 import type { TipoCliente } from './intake-rules';
+import { formatarHorarioCliente } from '../atendimento';
 
 const fold = (s:string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 export function partesAgenda(iso:string) {
@@ -111,4 +112,15 @@ export function selecionarOpcoesAna(busy:{start:string;end:string}[],now:Date,ti
   if(!periodo&&!distinct.some(s=>Number(partesAgenda(s)['hour'])>=13)){const afternoon=available.find(s=>Number(partesAgenda(s)['hour'])>=13&&!distinct.includes(s));if(afternoon){if(distinct.length===3)distinct.pop();distinct.push(afternoon);}}
   for(const s of available){if(distinct.length===3)break;if(!distinct.includes(s))distinct.push(s);}
   return {slots:distinct,semPeriodo};
+}
+
+/**
+ * Formato oficial da confirmação de consulta, determinado pela Dra. Carolina:
+ * a linha do horário e a linha do link da reunião, separadas por uma linha em branco.
+ * O link só sai quando a agenda devolveu um endereço Meet real; nunca é inventado.
+ */
+export function mensagemConfirmacaoAna(inicio:string,meetUrl?:string) {
+  const quando=formatarHorarioCliente(inicio);
+  const link=meetUrl&&/^https:\/\/meet\.google\.com\/[a-z0-9-]+$/i.test(meetUrl)?meetUrl:undefined;
+  return link?`Sua consulta está confirmada para ${quando}\n\nAcesse a reunião: ${link}`:`Sua consulta está confirmada para ${quando}`;
 }

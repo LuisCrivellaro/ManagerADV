@@ -52,7 +52,7 @@ function geradorSimulado(atual: () => Passo | undefined): Gerador {
 /** Redação simulada fiel às regras (só fatos, uma linha por movimentação). */
 export async function redacaoSimulada(e: EntradaRedacao): Promise<string> {
   const partes = e.processos.map(p => 'segredo_de_justica' in p
-    ? 'Sobre um dos seus processos, a equipe vai entrar em contato com você.'
+    ? 'Sobre um dos seus processos, nossa equipe vai entrar em contato com você.'
     : p.movimentacoes.length ? `No processo ${p.numero}, as últimas movimentações registradas foram:\n${p.movimentacoes.map(m => `• ${m.data}: ${m.descricao}`).join('\n')}` : `No processo ${p.numero}, não há movimentação nova registrada até o momento.`);
   return `${e.primeiro_nome ? `${e.primeiro_nome}, ` : ''}${partes.join('\n\n')}\n\nSe quiser entender o que alguma movimentação significa, a equipe explica.`;
 }

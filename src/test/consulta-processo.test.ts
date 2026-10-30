@@ -11,7 +11,7 @@ const AGORA = new Date('2026-10-29T13:00:00Z'); // quinta, 10h em Brasília
 /** Redação simulada que segue as regras: só fatos, uma linha por movimentação. */
 function redacaoFiel(e: EntradaRedacao): string {
   const partes = e.processos.map(p => 'segredo_de_justica' in p
-    ? 'Sobre um dos seus processos, a equipe vai entrar em contato com você.'
+    ? 'Sobre um dos seus processos, nossa equipe vai entrar em contato com você.'
     : p.movimentacoes.length ? `No processo ${p.numero}:\n${p.movimentacoes.map(m => `• ${m.data}: ${m.descricao}`).join('\n')}` : `No processo ${p.numero}, não há movimentação nova registrada até o momento.`);
   return `${e.primeiro_nome}, ${partes.join('\n\n')}\nSe quiser entender alguma movimentação, a equipe explica.`;
 }
@@ -150,10 +150,10 @@ describe('Rascunho: só fatos', () => {
   });
   it('falha na redação também usa o rascunho padrão', async () => {
     const r = await consulta(T.umProcesso, 'como está meu processo?', {}, portas({ redigir: async () => { throw new Error('modelo indisponível'); } }));
-    expect(r.tipo === 'pedido' && r.pedido.textoProposto).toContain('últimas movimentações registradas');
+    expect(r.tipo === 'pedido' && r.pedido.textoProposto).toContain('📄 Andamento do processo:');
   });
   it('campos ausentes não quebram o rascunho padrão', () => {
-    expect(rascunhoPadrao('', [{ codigo: 9, identificacao: 'código 9', segredo: false, andamentos: [] }])).toMatch(/^Aqui estão[\s\S]*Processo: não há movimentação nova/);
+    expect(rascunhoPadrao('', [{ codigo: 9, identificacao: 'código 9', segredo: false, andamentos: [] }])).toMatch(/^Olá, cliente! 😊[\s\S]*Ainda não há movimentação registrada\./);
   });
 });
 

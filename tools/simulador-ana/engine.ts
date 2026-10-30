@@ -401,7 +401,7 @@ export class SimuladorAna {
     const mensagem = res.tipo === 'nao_cliente' ? mensagemNaoCliente(new Date()) : res.mensagem;
     this.enviarAna(mensagem);
     turno.enviada = mensagem;
-    if (res.tipo !== 'perguntar_assunto') { this.pausar(res.tipo === 'nao_cliente' ? 'contato sem cadastro no ProJuris pediu notícia de processo' : res.motivo); turno.eventos.push('Conversa passada para a equipe: a Ana fica pausada até ser devolvida.'); }
+    if (res.tipo === 'nao_cliente' || res.tipo === 'equipe') { this.pausar(res.tipo === 'nao_cliente' ? 'contato sem cadastro no ProJuris pediu notícia de processo' : res.motivo); turno.eventos.push('Conversa passada para a equipe: a Ana fica pausada até ser devolvida.'); }
     return true;
   }
 }

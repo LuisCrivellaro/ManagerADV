@@ -44,7 +44,7 @@ export async function salvarCaso(antes: Conversa, depois: Conversa) {
     const current=row.data.dados as unknown as Conversa;
     const incoming=new Map((current.mensagens??[]).map(m=>[m.id,m]));
     const merged=depois.mensagens.map(m=>{const original=antes.mensagens.find(x=>x.id===m.id);const fresh=incoming.get(m.id);incoming.delete(m.id);return original&&fresh&&JSON.stringify(original)===JSON.stringify(m)?fresh:m;});
-    const data={...dados,...(antes.email===depois.email?{email:current.email}:{}),mensagens:[...merged,...incoming.values()],...(JSON.stringify(antes.agenteAna)===JSON.stringify(depois.agenteAna)?{agenteAna:current.agenteAna}:{}),...(antes.iaRetida===depois.iaRetida?{iaRetida:current.iaRetida}:{})};
+    const data={...dados,...(antes.email===depois.email?{email:current.email}:{}),mensagens:[...merged,...incoming.values()],agenteAna:{...(JSON.stringify(antes.agenteAna)===JSON.stringify(depois.agenteAna)?current.agenteAna:depois.agenteAna),pedidosProcesso:current.agenteAna?.pedidosProcesso,aguardandoAssuntoProcesso:current.agenteAna?.aguardandoAssuntoProcesso,consultaProcessoEmCurso:current.agenteAna?.consultaProcessoEmCurso,vinculoProjuris:current.agenteAna?.vinculoProjuris,aguardandoCpfProcesso:current.agenteAna?.aguardandoCpfProcesso,perguntaProcessoPendente:current.agenteAna?.perguntaProcessoPendente},...(antes.iaRetida===depois.iaRetida?{iaRetida:current.iaRetida}:{})};
     const r=await supabase.from('casos').update({dados:JSON.parse(JSON.stringify(data)) as Json,etapa:depois.etapa,nome:depois.nome,updated_at:new Date().toISOString()}).eq('id',id).eq('updated_at',row.data.updated_at).select('id');
     if(r.error)throw r.error;
     if(r.data?.length){saved=true;break;}

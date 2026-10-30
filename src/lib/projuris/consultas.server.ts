@@ -60,5 +60,15 @@ export function criarConsultasProjuris(cliente: Pick<ClienteProjuris, 'chamar'> 
     return ultimosAndamentosPublicos([...new Map(andamentos.map(a => [a.codigo, a])).values()], n);
   }
 
-  return { codigoSituacaoAtivo, pessoasCompletas, processosAtivos, ultimosAndamentos };
+  /** Pessoas pela busca geral com o CPF (só leitura). A escolha exata fica em vinculo.ts. */
+  async function pessoasPorCpf(cpf: string): Promise<{ codigo: number; nome: string; cpf?: string }[]> {
+    const raw = await cliente.chamar('pessoa.consulta', { consulta: { 'filtro-geral': cpf.replace(/\D/g, ''), pagina: 0, 'quan-registros': 20 } });
+    return registros(raw, ['pessoaConsulta', 'pessoas']).flatMap(r => {
+      const codigo = Number(r['codigoPessoa']), nome = typeof r['nome'] === 'string' ? r['nome'].trim() : '';
+      const doc = typeof r['cpfOuCnpj'] === 'string' ? r['cpfOuCnpj'] : undefined;
+      return Number.isSafeInteger(codigo) && codigo > 0 && nome ? [{ codigo, nome, ...(doc ? { cpf: doc } : {}) }] : [];
+    });
+  }
+
+  return { codigoSituacaoAtivo, pessoasCompletas, processosAtivos, ultimosAndamentos, pessoasPorCpf };
 }
