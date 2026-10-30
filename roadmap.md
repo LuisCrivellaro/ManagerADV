@@ -1,5 +1,10 @@
 # Construção dos módulos Manager ADV
 
+## Envio completo ao GitHub — 30/10/2026 (noite)
+- [x] Sincronizar o projeto (373 arquivos) em LuisCrivellaro/ManagerADV (main): 3 novos, 18 atualizados, nenhuma remoção; `bun.lock` preservado do repositório; revisão a1a311712966944a4187c5d24403f06b1edef62d.
+- [x] Cópia conferida arquivo por arquivo pelo hash do GitHub: 374/374 iguais (373 do projeto + `bun.lock`), sem ausentes, diferentes ou extras.
+- [x] Varredura de credenciais nos 21 arquivos enviados sem achados; `.env`, `.lovable`, `node_modules`, `dist` e caches fora do repositório.
+
 ## Consulta processual no servidor real — 30/10/2026
 - [x] Conferir os sete arquivos exigidos e o projeto completo (355 arquivos).
 - [x] Ligar o fluxo existente ao ProJuris e Claude, com pedidos na conversa e aprovação obrigatória.
