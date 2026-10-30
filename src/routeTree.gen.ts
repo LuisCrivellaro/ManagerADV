@@ -25,6 +25,7 @@ import { Route as AuthenticatedProducaoRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedProtocoloRouteImport } from './routes/_authenticated/protocolo'
 import { Route as AuthenticatedTreinamentoRouteImport } from './routes/_authenticated/treinamento'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as ApiPublicAtendimentoPendenciasProcessoRouteImport } from './routes/api/public/atendimento/pendencias-processo'
 import { Route as ApiPublicAtendimentoTelegramRouteImport } from './routes/api/public/atendimento/telegram'
 import { Route as ApiPublicAtendimentoWhatsappRouteImport } from './routes/api/public/atendimento/whatsapp'
 
@@ -112,6 +113,12 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAtendimentoPendenciasProcessoRoute =
+  ApiPublicAtendimentoPendenciasProcessoRouteImport.update({
+    id: '/api/public/atendimento/pendencias-processo',
+    path: '/api/public/atendimento/pendencias-processo',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicAtendimentoTelegramRoute =
   ApiPublicAtendimentoTelegramRouteImport.update({
     id: '/api/public/atendimento/telegram',
@@ -141,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/protocolo': typeof AuthenticatedProtocoloRoute
   '/treinamento': typeof AuthenticatedTreinamentoRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/api/public/atendimento/pendencias-processo': typeof ApiPublicAtendimentoPendenciasProcessoRoute
   '/api/public/atendimento/telegram': typeof ApiPublicAtendimentoTelegramRoute
   '/api/public/atendimento/whatsapp': typeof ApiPublicAtendimentoWhatsappRoute
 }
@@ -160,6 +168,7 @@ export interface FileRoutesByTo {
   '/treinamento': typeof AuthenticatedTreinamentoRoute
   '/': typeof AuthenticatedIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/api/public/atendimento/pendencias-processo': typeof ApiPublicAtendimentoPendenciasProcessoRoute
   '/api/public/atendimento/telegram': typeof ApiPublicAtendimentoTelegramRoute
   '/api/public/atendimento/whatsapp': typeof ApiPublicAtendimentoWhatsappRoute
 }
@@ -181,6 +190,7 @@ export interface FileRoutesById {
   '/_authenticated/treinamento': typeof AuthenticatedTreinamentoRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/api/public/atendimento/pendencias-processo': typeof ApiPublicAtendimentoPendenciasProcessoRoute
   '/api/public/atendimento/telegram': typeof ApiPublicAtendimentoTelegramRoute
   '/api/public/atendimento/whatsapp': typeof ApiPublicAtendimentoWhatsappRoute
 }
@@ -202,6 +212,7 @@ export interface FileRouteTypes {
     | '/protocolo'
     | '/treinamento'
     | '/.lovable/oauth/consent'
+    | '/api/public/atendimento/pendencias-processo'
     | '/api/public/atendimento/telegram'
     | '/api/public/atendimento/whatsapp'
   fileRoutesByTo: FileRoutesByTo
@@ -221,6 +232,7 @@ export interface FileRouteTypes {
     | '/treinamento'
     | '/'
     | '/.lovable/oauth/consent'
+    | '/api/public/atendimento/pendencias-processo'
     | '/api/public/atendimento/telegram'
     | '/api/public/atendimento/whatsapp'
   id:
@@ -241,6 +253,7 @@ export interface FileRouteTypes {
     | '/_authenticated/treinamento'
     | '/_authenticated/'
     | '/.lovable/oauth/consent'
+    | '/api/public/atendimento/pendencias-processo'
     | '/api/public/atendimento/telegram'
     | '/api/public/atendimento/whatsapp'
   fileRoutesById: FileRoutesById
@@ -251,6 +264,7 @@ export interface RootRouteChildren {
   McpRoute: typeof McpRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
+  ApiPublicAtendimentoPendenciasProcessoRoute: typeof ApiPublicAtendimentoPendenciasProcessoRoute
   ApiPublicAtendimentoTelegramRoute: typeof ApiPublicAtendimentoTelegramRoute
   ApiPublicAtendimentoWhatsappRoute: typeof ApiPublicAtendimentoWhatsappRoute
 }
@@ -369,6 +383,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/atendimento/pendencias-processo': {
+      id: '/api/public/atendimento/pendencias-processo'
+      path: '/api/public/atendimento/pendencias-processo'
+      fullPath: '/api/public/atendimento/pendencias-processo'
+      preLoaderRoute: typeof ApiPublicAtendimentoPendenciasProcessoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/atendimento/telegram': {
       id: '/api/public/atendimento/telegram'
       path: '/api/public/atendimento/telegram'
@@ -424,6 +445,8 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
+  ApiPublicAtendimentoPendenciasProcessoRoute:
+    ApiPublicAtendimentoPendenciasProcessoRoute,
   ApiPublicAtendimentoTelegramRoute: ApiPublicAtendimentoTelegramRoute,
   ApiPublicAtendimentoWhatsappRoute: ApiPublicAtendimentoWhatsappRoute,
 }

@@ -16,7 +16,7 @@ import {
   type ContatoTeste,
 } from './canal-envio';
 import { normalizarTelefone } from './telefone';
-import { numeroUltraMsgPermitido } from './production-channel';
+import { numeroWhatsAppAtendido } from './production-channel';
 import { ultramsgAdapter } from './canais/ultramsg';
 import { enviarTextoTelegram } from './canais/telegram';
 import { destinoTelegram, lerDestinoTelegram } from './telegram-bots';
@@ -73,6 +73,18 @@ async function exigirGestor(supabase: Db, userId: string): Promise<Ator> {
   return atorDoUsuario(supabase, userId);
 }
 
+/** Entrada do WhatsApp aberta? Lida no servidor com o cliente privilegiado; qualquer falha fecha (só a lista vale). */
+async function entradaWhatsAppAberta(): Promise<boolean> {
+  try {
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { donaEntradaWhatsApp } = await import('./entrada-whatsapp.server');
+    const dona = await donaEntradaWhatsApp(supabaseAdmin);
+    return !!dona.ownerId;
+  } catch {
+    return false;
+  }
+}
+
 interface EnvioBase {
   conversaId: string;
   acao: string;
@@ -80,6 +92,8 @@ interface EnvioBase {
   contatoEsperado?: string;
   /** Horários ofertados viram botões clicáveis no Telegram. */
   horarios?: string[] | undefined;
+  /** Conta da Dra. (e-mail verificado no login): envia a qualquer contato liberado, sem a lista de números. */
+  contaMaster?: boolean;
 }
 
 /** Núcleo do envio: vale para mensagens da equipe e do sistema. O destino é sempre buscado no servidor. */
@@ -128,9 +142,10 @@ async function enviarComRegras(supabase: Db, ator: Ator, entrada: EnvioBase) {
       await auditar(supabase, ator, entrada.acao, 'Envio recusado: contato WhatsApp não liberado', 'bloqueado');
       throw new Error('Contato de WhatsApp não liberado para esta conversa. Nada foi enviado.');
     }
-    if (!numeroUltraMsgPermitido(contato.contato_externo)) throw new Error('Número não autorizado nesta fase de produção.');
+    const entradaAberta = entrada.contaMaster === true || await entradaWhatsAppAberta();
+    if (!numeroWhatsAppAtendido(contato.contato_externo, entradaAberta)) throw new Error('Número não autorizado nesta fase de produção.');
     if (!process.env['ULTRAMSG_TOKEN'] || !process.env['ULTRAMSG_INSTANCE_ID']) throw new Error('WhatsApp não configurado. Nada foi enviado.');
-    const resultado = await ultramsgAdapter.enviarTexto(contato.contato_externo, entrada.texto, entrada.horarios?.length ? { botoes: botoesHorarios(entrada.horarios) } : undefined);
+    const resultado = await ultramsgAdapter.enviarTexto(contato.contato_externo, entrada.texto, { ...(entrada.horarios?.length ? { botoes: botoesHorarios(entrada.horarios) } : {}), entradaAberta });
     if (!resultado.ok) {
       await auditar(supabase, ator, entrada.acao, 'Falha no envio pelo WhatsApp', 'erro', resultado.erro);
       throw new Error('O envio pelo WhatsApp não foi concluído. Nada foi registrado como enviado.');
@@ -148,7 +163,8 @@ export const enviarMensagemCanal = createServerFn({ method: 'POST' })
   .inputValidator(z.object({ conversaId: z.string().uuid(), acao: z.string().min(1).max(60), texto: z.string().max(16000), horarios: z.array(z.string().datetime()).max(8).optional() }))
   .handler(async ({ data, context }) => {
     const ator = await atorDoUsuario(context.supabase, context.userId);
-    return enviarComRegras(context.supabase, ator, data);
+    const email = String((context.claims as { email?: unknown } | undefined)?.email ?? '').trim().toLowerCase();
+    return enviarComRegras(context.supabase, ator, { ...data, contaMaster: email === 'chamanalei@gmail.com' });
   });
 
 /** Envio pelo sistema (agente/lembretes): só chamável no servidor, pronto para a fase 3. Ainda não usado. */
@@ -244,7 +260,7 @@ export const salvarContatoTeste = createServerFn({ method: 'POST' })
     if (data.status === 'liberado') {
       const atual = data.id ? await context.supabase.from('atendimento_contatos_teste').select('contato_externo,canal').eq('id', data.id).maybeSingle() : undefined;
       const destino = atual?.data?.contato_externo ?? data.contatoExterno ?? '';
-      if (atual?.error || (atual?.data && atual.data.canal !== 'ultramsg') || !numeroUltraMsgPermitido(destino)) throw new Error('Número não autorizado nesta fase de produção.');
+      if (atual?.error || (atual?.data && atual.data.canal !== 'ultramsg') || !numeroWhatsAppAtendido(destino, await entradaWhatsAppAberta())) throw new Error('Número não autorizado nesta fase de produção.');
     }
     if (telefone.length < 12) throw new Error('Informe o telefone fictício com DDD.');
     if (!data.id && !(data.contatoExterno ?? '').trim()) throw new Error(data.canal === 'ultramsg' ? 'Informe o número de WhatsApp.' : 'Informe o chat_id do Telegram.');
@@ -359,7 +375,6 @@ export const salvarEntradaWhatsApp = createServerFn({ method: 'POST' })
   .inputValidator(z.object({ ativa: z.boolean() }))
   .handler(async ({ data, context }) => {
     const ator = await exigirGestor(context.supabase, context.userId);
-    if (data.ativa) throw new Error('Entrada geral fechada: atendimento restrito aos números autorizados.');
     const entradaWhatsApp = { ativa: data.ativa, atualizadoEm: new Date().toISOString() };
     for (let tentativa = 0; tentativa < 5; tentativa++) {
       const row = await context.supabase.from('office_workspace').select('dados,updated_at').eq('owner_id', context.userId).maybeSingle();

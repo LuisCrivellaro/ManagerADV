@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { PageHeader } from './shared';
+import { ProcessReviews } from './process-reviews';
 
 export function ApprovalsPage() {
   const { user } = AuthRoute.useRouteContext();
@@ -42,10 +43,11 @@ export function ApprovalsPage() {
     finally { setBusy(false); }
   };
   return <div className="mx-auto max-w-[1500px] p-4 md:p-8">
-    <PageHeader title="Aprovações de minutas">
+    <PageHeader title="Aprovações">
       <span className="text-xs text-muted-foreground">{query.data?.entireOffice ? 'Escritório inteiro' : 'Meus casos'} · {query.data ? new Date(query.data.updatedAt).toLocaleTimeString('pt-BR') : '—'}</span>
       <Button variant="outline" size="icon" aria-label="Atualizar aprovações" title="Atualizar aprovações" disabled={query.isFetching} onClick={() => query.refetch()}><RefreshCw className={query.isFetching ? 'animate-spin' : ''} /></Button>
     </PageHeader>
+    <ProcessReviews />
     {query.isPending ? <p className="flex items-center gap-2 text-muted-foreground"><Loader2 className="size-4 animate-spin" />Carregando aprovações…</p> : query.isError ? <p role="alert" className="text-destructive">Não foi possível carregar as aprovações. Tente atualizar.</p> : <>
       <div className="mb-6 grid gap-6 border-b pb-6 sm:grid-cols-3">
         {[{ icon: ClipboardCheck, label: 'Minutas pendentes', value: pending.length }, { icon: CalendarClock, label: 'Vencidas / hoje', value: pending.filter(r => r.dueDate && r.dueDate <= today).length }, { icon: CircleAlert, label: 'Sem advogado definido', value: pending.filter(r => !r.lawyerId).length }].map(item => <div key={item.label} className="flex items-center gap-4"><item.icon className="size-6 text-primary" /><div><p className="text-3xl font-semibold">{item.value}</p><p className="text-sm text-muted-foreground">{item.label}</p></div></div>)}

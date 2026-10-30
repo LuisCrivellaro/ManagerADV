@@ -63,7 +63,6 @@ describe('webhook do WhatsApp do escritório', () => {
     mocks.erroContatos = true;
     const r = await enviar({ event_type: 'message_received', data: { id: 'falha', from: '5511942074361@c.us', body: 'oi' } });
     expect(r.status).toBe(503);
-    expect(mocks.dona).not.toHaveBeenCalled();
     expect(mocks.abrir).not.toHaveBeenCalled();
     expect(mocks.ana).not.toHaveBeenCalled();
   });
@@ -73,14 +72,24 @@ describe('webhook do WhatsApp do escritório', () => {
     mocks.dona.mockResolvedValue({ ownerId: 'dona' });
     mocks.abrir.mockImplementation(async () => { mocks.contatos = [{ id: 'novo', conversa_id: 'caso', contato_externo: '5511942074361', status: 'liberado' }]; return { conversaId: 'caso' }; });
     expect((await enviar({ event_type: 'message_received', data: { id: 'm1', from: '5511942074361@c.us', body: 'Olá Dra. Carolina, gostaria de agendar uma consulta gratuita.', pushname: 'Joana' } })).status).toBe(200);
-    expect(mocks.abrir).toHaveBeenCalledWith(expect.anything(), 'dona', '5511942074361', 'Joana', undefined);
+    expect(mocks.abrir).toHaveBeenCalledWith(expect.anything(), 'dona', '5511942074361', 'Joana', undefined, true);
     expect(mocks.ana).toHaveBeenCalledWith(expect.anything(), 'caso', 'ultramsg:5511942074361:m1', expect.anything());
   });
 
-  it('número fora da lista não abre conversa nem chama Ana mesmo com entrada aberta', async () => {
+  it('entrada aberta: número fora da lista ganha conversa e a Ana responde', async () => {
     preparar(); mocks.dona.mockResolvedValue({ ownerId: 'dona' });
-    await enviar({ event_type: 'message_received', data: { id: 'fora', from: '5511900000000@c.us', body: 'oi' } });
-    expect(mocks.dona).not.toHaveBeenCalled(); expect(mocks.abrir).not.toHaveBeenCalled(); expect(mocks.ana).not.toHaveBeenCalled();
+    mocks.abrir.mockImplementation(async () => { mocks.contatos = [{ id: 'novo', conversa_id: 'caso', contato_externo: '5511900000000', status: 'liberado' }]; return { conversaId: 'caso' }; });
+    expect((await enviar({ event_type: 'message_received', data: { id: 'fora', from: '5511900000000@c.us', body: 'oi', pushname: 'Cliente Novo' } })).status).toBe(200);
+    expect(mocks.abrir).toHaveBeenCalledWith(expect.anything(), 'dona', '5511900000000', 'Cliente Novo', undefined, true);
+    expect(mocks.ana).toHaveBeenCalledWith(expect.anything(), 'caso', 'ultramsg:5511900000000:fora', expect.anything());
+  });
+
+  it('entrada fechada ou configuração indisponível: número fora da lista é ignorado', async () => {
+    preparar(); mocks.dona.mockResolvedValue({ motivo: 'Entrada de novos contatos fechada' });
+    await enviar({ event_type: 'message_received', data: { id: 'fora1', from: '5511900000000@c.us', body: 'oi' } });
+    mocks.dona.mockRejectedValue(new Error('Configuração de entrada indisponível'));
+    await enviar({ event_type: 'message_received', data: { id: 'fora2', from: '5511900000000@c.us', body: 'oi' } });
+    expect(mocks.abrir).not.toHaveBeenCalled(); expect(mocks.ana).not.toHaveBeenCalled();
   });
 
   it('entrada fechada ou contato bloqueado: nada é criado e a Ana não responde', async () => {

@@ -23,8 +23,8 @@ function Cartao({ title, children }: { title: string; children: React.ReactNode 
   return <section className="rounded-md border bg-card p-4"><h3 className="mb-3 text-sm font-semibold">{title}</h3>{children}</section>;
 }
 
-export function CanalAgente({ open, onOpenChange, conversas, onConfig }: {
-  open: boolean; onOpenChange: (v: boolean) => void; conversas: Conversa[]; onConfig?: (c: CanalConfig) => void;
+export function CanalAgente({ open, onOpenChange, conversas, onConfig, podeGerenciar = false }: {
+  open: boolean; onOpenChange: (v: boolean) => void; conversas: Conversa[]; onConfig?: (c: CanalConfig) => void; podeGerenciar?: boolean;
 }) {
   const qc = useQueryClient();
   const read = useServerFn(lerConfigCanal);
@@ -96,8 +96,11 @@ export function CanalAgente({ open, onOpenChange, conversas, onConfig }: {
 
       <Cartao title="WhatsApp do escritório">
         <label className="flex items-center justify-between gap-4 text-sm">Atender todo mundo que escrever
-          <Switch checked={entrada.data?.ativa ?? false} disabled aria-label="Atender todo mundo que escrever no WhatsApp do escritório"
-            onCheckedChange={ativa => void executar(ativa ? 'Abrir entrada do WhatsApp' : 'Fechar entrada do WhatsApp', async () => { await salvarEntrada({ data: { ativa } }); await qc.invalidateQueries({ queryKey: ['entrada-whatsapp'] }); })} />
+          <Switch checked={entrada.data?.ativa ?? false} disabled={!podeGerenciar} aria-label="Atender todo mundo que escrever no WhatsApp do escritório"
+            onCheckedChange={ativa => {
+              if (ativa && !window.confirm('A Ana vai responder qualquer pessoa que escrever no WhatsApp do escritório. Confirmar?')) return;
+              void executar(ativa ? 'Abrir entrada do WhatsApp' : 'Fechar entrada do WhatsApp', async () => { await salvarEntrada({ data: { ativa } }); await qc.invalidateQueries({ queryKey: ['entrada-whatsapp'] }); });
+            }} />
         </label>
         <p className="mt-1 text-xs text-muted-foreground">{entrada.data?.ativa
           ? 'Ligado: quem escrever no número do escritório ganha uma conversa na sua conta e é atendido pela Ana. Para a Ana não responder alguém, use Bloquear na lista de contatos.'

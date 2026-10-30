@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, afterEach } from 'vitest';
-import { numeroUltraMsgPermitido, numerosUltraMsgPermitidos } from '@/lib/atendimento/production-channel';
+import { numeroUltraMsgPermitido, numeroWhatsAppAtendido, numerosUltraMsgPermitidos } from '@/lib/atendimento/production-channel';
 import { enviarTextoUltramsg } from '@/lib/atendimento/canais/ultramsg';
 
 afterEach(() => vi.unstubAllGlobals());
@@ -18,5 +18,26 @@ describe('UltraMsg restrito até segunda ordem', () => {
     const fetch = vi.fn(); vi.stubGlobal('fetch', fetch);
     expect((await enviarTextoUltramsg('5511900000000', 'oi', { instancia: 'test', token: 'test' })).ok).toBe(false);
     expect(fetch).not.toHaveBeenCalled();
+  });
+});
+
+describe('checagem única com a entrada do WhatsApp', () => {
+  it('entrada aberta aceita número fora da lista; fechada ou indisponível, só a lista', () => {
+    expect(numeroWhatsAppAtendido('5511900000000@c.us', true)).toBe(true);
+    expect(numeroWhatsAppAtendido('+55 (11) 90000-0000', true)).toBe(true);
+    expect(numeroWhatsAppAtendido('5511900000000@c.us', false)).toBe(false);
+    expect(numeroWhatsAppAtendido('5511999600306@c.us', false)).toBe(true);
+    expect(numeroWhatsAppAtendido('5511999600306@c.us', true)).toBe(true);
+  });
+  it('grupos, transmissões e canais são recusados mesmo com a entrada aberta', () => {
+    expect(numeroWhatsAppAtendido('1203630@g.us', true)).toBe(false);
+    expect(numeroWhatsAppAtendido('5511900000000@broadcast', true)).toBe(false);
+    expect(numeroWhatsAppAtendido('5511900000000@newsletter', true)).toBe(false);
+  });
+  it('envio com a entrada aberta chama o provedor para número fora da lista', async () => {
+    const fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ sent: 'true', id: 1 }) });
+    vi.stubGlobal('fetch', fetch);
+    expect((await enviarTextoUltramsg('5511900000000', 'oi', { instancia: 'test', token: 'test' }, true)).ok).toBe(true);
+    expect(fetch).toHaveBeenCalledOnce();
   });
 });

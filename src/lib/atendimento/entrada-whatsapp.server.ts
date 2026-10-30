@@ -4,7 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database, Json } from '@/integrations/supabase/types';
 import { normalizarTelefone } from './telefone';
 import { novaConversaWhatsApp } from './entrada-whatsapp';
-import { numeroUltraMsgPermitido } from './production-channel';
+import { numeroWhatsAppAtendido } from './production-channel';
 
 type Db = SupabaseClient<Database>;
 
@@ -26,8 +26,8 @@ export async function donaEntradaWhatsApp(db: Db): Promise<{ ownerId?: string; m
 }
 
 /** Cria a conversa e libera o contato. Em corrida com outra mensagem do mesmo número, desfaz a conversa vazia criada. */
-export async function abrirConversaWhatsApp(db: Db, ownerId: string, numero: string, nomePerfil: string | undefined, existente?: { id: string; conversa_id: string | null }) {
-  if (!numeroUltraMsgPermitido(numero)) throw new Error('Número não autorizado nesta fase de produção.');
+export async function abrirConversaWhatsApp(db: Db, ownerId: string, numero: string, nomePerfil: string | undefined, existente?: { id: string; conversa_id: string | null }, entradaAberta = false) {
+  if (!numeroWhatsAppAtendido(numero, entradaAberta)) throw new Error('Número não autorizado nesta fase de produção.');
   if (existente?.conversa_id) {
     const r = await db.from('atendimento_contatos_teste').update({ status: 'liberado' }).eq('id', existente.id);
     if (r.error) throw new Error('Não foi possível liberar o contato.');

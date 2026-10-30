@@ -27,6 +27,8 @@ export interface ReferenciaCanal {
   token?: string;
   /** Botões clicáveis (Telegram), um por linha. */
   botoes?: { texto: string; dados: string }[];
+  /** Entrada do WhatsApp aberta: qualquer número é aceito no envio (decidido no servidor). */
+  entradaAberta?: boolean;
 }
 
 export interface AdaptadorCanal {

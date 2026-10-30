@@ -10,7 +10,7 @@ import { textoEscolhaHorario } from '@/lib/atendimento/botoes-horario';
 import { iniciarAtendimentoAutomatico } from '@/lib/atendimento/initial-attendance';
 import { decidirEntradaWhatsApp, destinoIgnoradoWhatsApp, mensagemDoSistema } from '@/lib/atendimento/entrada-whatsapp';
 import type { Conversa } from '@/lib/mock-data';
-import { numeroUltraMsgPermitido } from '@/lib/atendimento/production-channel';
+import { numeroWhatsAppAtendido } from '@/lib/atendimento/production-channel';
 
 function seguroIgual(a: string, b: string) {
   const ba = Buffer.from(a), bb = Buffer.from(b);
@@ -127,7 +127,24 @@ export const Route = createFileRoute('/api/public/atendimento/whatsapp')({
         if (config.data?.canal_ativo !== 'ultramsg') { await auditar('mensagemRecebida', 'WhatsApp desligado · mensagem ignorada', 'bloqueado'); return Response.json({ ok: true, ignorado: true }); }
 
         const numero = numeroWhatsApp(manual ? data.to ?? '' : data.from);
-        if (!numeroUltraMsgPermitido(numero)) {
+        const { respostaAutorizada } = await import('@/lib/atendimento/consulta-processo');
+        if (respostaAutorizada({ canal: 'whatsapp', contato: numero }, process.env['REVISORA_WHATSAPP'])) {
+          // Ecos de envio à revisora nunca pausam uma conversa; comandos nunca passam à Ana.
+          if (manual) return Response.json({ ok: true, revisora: true });
+          try {
+            const { receberRevisora } = await import('@/lib/atendimento/consulta-processo.server');
+            await receberRevisora(supabaseAdmin, numero, data.body);
+            return Response.json({ ok: true, revisora: true });
+          } catch {
+            await auditar('comandoRevisora', 'Comando não concluído; conferir revisão no Manager ADV', 'erro');
+            return Response.json({ error: 'Revisão não concluída' }, { status: 503 });
+          }
+        }
+        // Checagem única de produção: entrada aberta atende qualquer número; fechada ou indisponível, só a lista.
+        const { donaEntradaWhatsApp, abrirConversaWhatsApp } = await import('@/lib/atendimento/entrada-whatsapp.server');
+        let dona: { ownerId?: string; motivo?: string } = {};
+        try { dona = (await donaEntradaWhatsApp(supabaseAdmin)) ?? {}; } catch { /* falha ao ler a configuração: entrada fechada, só a lista vale */ }
+        if (!numeroWhatsAppAtendido(numero, !!dona.ownerId)) {
           await auditar('mensagemRecebida', 'Número fora da lista autorizada; nenhuma mensagem processada', 'bloqueado');
           return Response.json({ ok: true, ignorado: true });
         }
@@ -144,12 +161,10 @@ export const Route = createFileRoute('/api/public/atendimento/whatsapp')({
         if (manual) return registrarRespostaManual(supabaseAdmin, contato, data, auditar);
 
         // Celular próprio do escritório: com a entrada aberta, quem escrever ganha conversa; bloqueados nunca.
-        const { donaEntradaWhatsApp, abrirConversaWhatsApp } = await import('@/lib/atendimento/entrada-whatsapp.server');
-        const dona = contato?.status === 'liberado' && contato.conversa_id ? {} : await donaEntradaWhatsApp(supabaseAdmin);
         const decisao = decidirEntradaWhatsApp(contato, !!dona.ownerId);
         if (decisao === 'criar' || decisao === 'liberar') {
           try {
-            await abrirConversaWhatsApp(supabaseAdmin, dona.ownerId ?? '', numero, data.pushname, contato);
+            await abrirConversaWhatsApp(supabaseAdmin, dona.ownerId ?? '', numero, data.pushname, contato, !!dona.ownerId);
             await auditar('novoContatoWhatsApp', `Nova conversa aberta · ${mascararContato(numero)}`, 'sucesso');
           } catch {
             // Outra mensagem do mesmo número pode ter aberto a conversa ao mesmo tempo: a releitura abaixo decide.

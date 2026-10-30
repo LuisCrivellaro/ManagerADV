@@ -10,7 +10,8 @@ export async function saveOffice(owner: string, state: OfficeState) {
   const pause=salvo?.anaPausa;
   // A entrada do WhatsApp é salva só pelo servidor (Canal e Agente); a tela nunca a sobrescreve.
   const {entradaWhatsApp:_ignorada,...estado}=state;
-  const next={...estado,...(pause?.ativa?{anaPausa:pause}:{}),...(salvo?.entradaWhatsApp?{entradaWhatsApp:salvo.entradaWhatsApp}:{})};
+  const codigos=(row.data?.dados as Record<string,Json>|null)?.['codigosProcessoReservados'];
+  const next={...estado,...(pause?.ativa?{anaPausa:pause}:{}),...(salvo?.entradaWhatsApp?{entradaWhatsApp:salvo.entradaWhatsApp}:{}),...(codigos?{codigosProcessoReservados:codigos}:{})};
   const r=row.data?await supabase.from('office_workspace').update({dados:next as unknown as Json,updated_at:new Date().toISOString()}).eq('owner_id',owner).eq('updated_at',row.data.updated_at).select('owner_id'):await supabase.from('office_workspace').insert({owner_id:owner,dados:next as unknown as Json}).select('owner_id');
   if(r.error)throw r.error;
   if(r.data?.length)return;

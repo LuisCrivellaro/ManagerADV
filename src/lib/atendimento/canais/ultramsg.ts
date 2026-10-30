@@ -1,6 +1,6 @@
 // Adaptador UltraMsg (WhatsApp). Token e instância vêm só do servidor e nunca aparecem em logs ou erros.
 import type { AdaptadorCanal, ResultadoEnvio } from './tipos';
-import { numeroUltraMsgPermitido } from '../production-channel';
+import { numeroWhatsAppAtendido } from '../production-channel';
 import { chaveTelefone } from '../../projuris/telefone';
 
 const TIMEOUT_MS = 15000;
@@ -39,8 +39,8 @@ export function textoComOpcoes(texto: string, botoes?: { texto: string; dados?: 
   return `${texto}\n\n${faltam.map(b => `• ${b.texto.replace(/^🗓️\s*/u, '')}`).join('\n')}`;
 }
 
-export async function enviarTextoUltramsg(numero: string, texto: string, cred: { instancia: string; token: string }): Promise<ResultadoEnvio> {
-  if (!numeroUltraMsgPermitido(numero)) return { ok: false, erro: 'Número não autorizado nesta fase de produção.' };
+export async function enviarTextoUltramsg(numero: string, texto: string, cred: { instancia: string; token: string }, entradaAberta = false): Promise<ResultadoEnvio> {
+  if (!numeroWhatsAppAtendido(numero, entradaAberta)) return { ok: false, erro: 'Número não autorizado nesta fase de produção.' };
   return enviarSemLista(numero, texto, cred);
 }
 
@@ -80,5 +80,5 @@ export const ultramsgAdapter: AdaptadorCanal = {
   enviarTexto: (contato, texto, ref) => enviarTextoUltramsg(contato, textoComOpcoes(texto, ref?.botoes), {
     instancia: process.env['ULTRAMSG_INSTANCE_ID'] ?? '',
     token: ref?.token ?? process.env['ULTRAMSG_TOKEN'] ?? '',
-  }),
+  }, ref?.entradaAberta ?? false),
 };
