@@ -4,7 +4,7 @@ import type { Conversa } from '../mock-data';
 import { defaultState, type OfficeState } from '../office';
 import { defaultAutomations, newMessage, chosenSlot, formatarHorarioCliente } from '../atendimento';
 import { escolherReservaAna } from './calendar-booking';
-import { aplicarRegrasAna, expedienteAna, mensagemSemResposta, aceitarRespostaAna, respostaAgendaTeste, priorizarAgendamentoAna } from './ana-rules';
+import { aplicarRegrasAna, expedienteAna, mensagemSemResposta, aceitarRespostaAna, respostaAgendaTeste, priorizarAgendamentoAna, saudacaoClienteNovo } from './ana-rules';
 import { etiquetaConversa, identificarTipoCliente } from './intake-rules';
 import { telefoneRemetenteAna } from './telegram-intake';
 import { horarioPermitido } from './schedule-rules';
@@ -117,7 +117,7 @@ export async function processarAna(db:Db,id:string,messageId:string,request:Requ
         horarios=opcoes.slots;semPeriodo=opcoes.semPeriodo;
       }
     }
-    const r=aplicarRegrasAna(raw,mode,m.texto,state.training.proibidos,{teste,horarios,ultimaResposta:previous,agendaReal,tipoCliente,nome,telefone,emailPendente:c.etapa==='documentos'&&solicitarEmailPendente(lista.data,email)});
+    const r=saudacaoClienteNovo(aplicarRegrasAna(raw,mode,m.texto,state.training.proibidos,{teste,horarios,ultimaResposta:previous,agendaReal,tipoCliente,nome,telefone,emailPendente:c.etapa==='documentos'&&solicitarEmailPendente(lista.data,email)}),m.texto,{apresentado:!!c.agenteAna?.apresentado,tipoCliente});
     if(agendaReal&&!selecionado&&!horarioPendente&&!gerenciarExistente&&r.acao==='enviar'&&r.intencao==='agendamento'&&!r.motivo_aprovacao){
       r.mensagem=listaHorariosAna(horarios,new Date(),repetida);
       if(frustracaoHorariosAna(m.texto)&&horarios.length)r.mensagem=r.mensagem.replace(/^[^\n]+/,'Desculpe! Aqui vão opções diferentes:');

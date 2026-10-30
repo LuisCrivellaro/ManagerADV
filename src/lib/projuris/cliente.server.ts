@@ -65,8 +65,12 @@ export function criarClienteProjuris(o: OpcoesClienteProjuris = {}) {
     const ctrl = new AbortController();
     const relogio = setTimeout(() => ctrl.abort(), timeoutMs);
     try {
-      return await executar(url, { ...init, signal: ctrl.signal, redirect: 'error' });
-    } catch {
+      // O servidor publicado não aceita redirect 'error'; 'manual' + recusa de 3xx mantém o mesmo efeito.
+      const r = await executar(url, { ...init, signal: ctrl.signal, redirect: 'manual' });
+      if (r.status >= 300 && r.status < 400) { await r.body?.cancel().catch(() => undefined); throw new Error('redirecionamento'); }
+      return r;
+    } catch (e) {
+      console.error('ProJuris fetch:', e instanceof Error ? e.message : 'erro');
       throw ctrl.signal.aborted
         ? new ErroProjuris('tempo', 'O ProJuris não respondeu a tempo.')
         : new ErroProjuris('indisponivel', 'Falha de comunicação com o ProJuris.');

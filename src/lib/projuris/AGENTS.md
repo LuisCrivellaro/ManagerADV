@@ -5,3 +5,4 @@
 - 403 is `sem_permissao`: record and tell the Dra., never work around. 429/5xx/network/timeout retry with backoff; 401 renews the token once. Queue keeps at most 480 requests per minute per server instance. Why: provider limits and safe failure.
 - Protect by default: only the phone marked principal identifies; duplicates never pick a person; only active processes where the person has flagCliente; missing `privado` means private and missing `segredoJustica` means secret; the "Ativo" code comes from the tipo query, never hard-coded. Why: confidentiality.
 - Field names follow the public docs; list wrappers are confirmed with `tools/projuris-teste-conexao` (`--estrutura` prints names only). Why: undocumented response shapes.
+- The Clientes page ProJuris tab reads `pessoa.consulta` live (senior/admin only), cached in server memory for 10 minutes and never saved to the database. Why: the Dra. chose a live view over copying records.

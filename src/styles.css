@@ -1,0 +1,288 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design system definition.
+ *
+ * The @theme inline block maps CSS custom properties to Tailwind utility
+ * classes (e.g. --color-primary -> bg-primary, text-primary).
+ *
+ * The :root and .dark blocks define the actual color values using oklch.
+ * Colors use oklch except explicit brand tokens.
+ *
+ * To add a new semantic color:
+ * 1. Add the variable to :root (light value) and .dark (dark value)
+ * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-primary-hover: var(--primary-hover);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-pending: var(--pending);
+  --color-pending-foreground: var(--pending-foreground);
+  --color-bubble-out: var(--bubble-out);
+  --color-bubble-in: var(--bubble-in);
+  --color-chat-bg: var(--chat-bg);
+  --color-brand: var(--brand);
+  --color-brand-pale: var(--brand-pale);
+  --color-petrol: var(--petrol);
+  /* Escala de texto: 12px é o mínimo (horários e metadados); 13px secundário; 14px leitura. */
+  --text-2xs: 0.75rem;
+  --text-2xs--line-height: 1rem;
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.125rem;
+  --font-serif: "EB Garamond", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-doc: "Times New Roman", Times, serif;
+  --shadow-soft: var(--shadow-soft);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --header-h: calc(4rem + env(safe-area-inset-top, 0px));
+  --document-aqua: #00ACA7;
+  --document-pale: #E9F7F6;
+  --document-rule: #CFE9E7;
+  --document-ink: #000000;
+  --document-paper: #FFFFFF;
+  /* Identidade CS Lawyers: aqua da marca, papel branco, tinta preta e petróleo (tom profundo do aqua). */
+  --brand: #00ACA7;
+  --brand-pale: #E9F7F6;
+  --petrol: #0F3533;
+  --radius: 0.375rem;
+  --background: #F4F7F7;
+  --foreground: #141A1A;
+  --card: #FFFFFF;
+  --card-foreground: #141A1A;
+  --popover: #FFFFFF;
+  --popover-foreground: #141A1A;
+  /* Aqua de ação: mesmo matiz da marca, mais fechado para texto branco legível (4,9:1). */
+  --primary: #007F7B;
+  --primary-hover: #006A67;
+  --primary-foreground: #FFFFFF;
+  --secondary: #E9F7F6;
+  --secondary-foreground: #0F4744;
+  --muted: #EDF2F2;
+  --muted-foreground: #5B6B6B;
+  --accent: #E9F7F6;
+  --accent-foreground: #0F4744;
+  --destructive: oklch(0.52 0.19 27);
+  --destructive-foreground: oklch(1 0 0);
+  --success: oklch(0.53 0.13 145);
+  --success-foreground: oklch(1 0 0);
+  --pending: #FFE600;
+  --pending-foreground: #0D0D0D;
+  --bubble-out: #DDF2F0;
+  --bubble-in: #FFFFFF;
+  --chat-bg: #EEF4F4;
+  --border: #D9E6E5;
+  --input: #CFDEDD;
+  --ring: #00ACA7;
+  --shadow-soft: 0 1px 2px rgb(15 53 51 / 5%), 0 8px 24px -12px rgb(15 53 51 / 18%);
+  --chart-1: #00ACA7;
+  --chart-2: oklch(0.53 0.13 145);
+  --chart-3: oklch(0.92 0.19 105);
+  --chart-4: oklch(0.52 0.19 27);
+  --chart-5: #0F3533;
+  --sidebar: #0F3533;
+  --sidebar-foreground: #D3E6E4;
+  --sidebar-primary: #00ACA7;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #164441;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #24524F;
+  --sidebar-ring: #00ACA7;
+}
+
+.dark {
+  --pending: #FFE600;
+  --pending-foreground: #0D0D0D;
+  --background: oklch(0.129 0.042 264.695);
+  --foreground: oklch(0.984 0.003 247.858);
+  --card: oklch(0.208 0.042 265.755);
+  --card-foreground: oklch(0.984 0.003 247.858);
+  --popover: oklch(0.208 0.042 265.755);
+  --popover-foreground: oklch(0.984 0.003 247.858);
+  --primary: oklch(0.929 0.013 255.508);
+  --primary-foreground: oklch(0.208 0.042 265.755);
+  --secondary: oklch(0.279 0.041 260.031);
+  --secondary-foreground: oklch(0.984 0.003 247.858);
+  --muted: oklch(0.279 0.041 260.031);
+  --muted-foreground: oklch(0.704 0.04 256.788);
+  --accent: oklch(0.279 0.041 260.031);
+  --accent-foreground: oklch(0.984 0.003 247.858);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.551 0.027 264.364);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.208 0.042 265.755);
+  --sidebar-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.279 0.041 260.031);
+  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.551 0.027 264.364);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+}
+
+@layer base {
+  body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  h1, h2, h3 { font-family: var(--font-serif); letter-spacing: -0.005em; }
+  :focus-visible { outline-color: var(--brand); }
+}
+
+/* Faixa de título das peças do escritório: aqua claro com régua lateral aqua. */
+@utility section-title {
+  border-left: 3px solid var(--brand);
+  background: var(--brand-pale);
+  padding: 0.45rem 0.85rem 0.4rem;
+  border-radius: 0 2px 2px 0;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--foreground);
+}
+
+/* Assinatura da marca no cabeçalho, como no papel timbrado. */
+.brand-lockup { font-family: var(--font-serif); font-weight: 600; letter-spacing: 0.045em; line-height: 1; color: var(--foreground); }
+.brand-lockup .brand-bar { color: var(--brand); font-weight: 400; margin: 0 0.3em; }
+.brand-cities { font-family: var(--font-sans); font-weight: 600; font-size: 11px; letter-spacing: 0.18em; font-variant: small-caps; text-transform: lowercase; color: var(--primary); line-height: 1; }
+
+/* Menu lateral: grupos e a linha do fluxo do caso, ligando as etapas na ordem do escritório. */
+.office-nav-label { color: #8FB3B0; font-size: 12px; font-weight: 500; letter-spacing: 0.02em; }
+.office-flow > li { position: relative; }
+.office-flow > li:not(:last-child)::after { content: ""; position: absolute; left: 15.5px; top: 27px; height: 14px; width: 1px; background: #3E6C69; pointer-events: none; }
+.office-nav a[data-active="true"] { background: #1B4B48; color: #FFFFFF; font-weight: 500; box-shadow: inset 2px 0 0 var(--brand); }
+.office-nav a[data-active="true"] > svg { color: var(--brand); }
+.office-nav a:not([data-active="true"]) > svg { color: #8FB3B0; }
+.office-nav a:hover > svg { color: #FFFFFF; }
+
+.legal-paper { width: 210mm; min-height: 297mm; padding: 12.5mm 30mm; background: var(--document-paper); color: var(--document-ink); }
+.legal-letterhead, .legal-letterfoot { display:flex; justify-content:space-between; gap:12px; font-family:var(--font-serif); font-size:10pt; border-bottom:0.5pt solid var(--document-aqua); padding-bottom:8px; }
+.legal-letterhead span { color:var(--document-aqua); font-size:8pt; font-weight:bold; }
+.legal-letterfoot { border-bottom:0; border-top:0.5pt solid var(--document-ink); padding-top:8px; font-size:8pt; margin-top:12.5mm; color:var(--document-aqua); }
+.legal-copy { margin-top:12.5mm; font-family:var(--font-doc); font-size:12pt; line-height:1.5; overflow-wrap:anywhere; }
+.legal-copy p { margin-bottom:6pt; white-space:pre-wrap; }
+.legal-body { text-align:justify; text-indent:25mm; }
+.legal-copy .legal-title { text-align:center; font-family:var(--font-doc); font-size:15pt; color:var(--document-aqua); font-weight:bold; text-transform:uppercase; margin:18pt 0; }
+.legal-copy .legal-heading1 { font-size:11.5pt; font-weight:bold; text-transform:uppercase; background:var(--document-pale); border-left:3pt solid var(--document-aqua); padding-left:8pt; margin:18pt 0 10pt; }
+.legal-copy .legal-heading2 { font-size:11.5pt; font-weight:bold; color:var(--document-aqua); margin:10pt 0 5pt; }
+.legal-address { text-transform:uppercase; font-weight:bold; text-align:justify; }
+.legal-quote { margin-left:40mm; font-size:10pt; font-style:italic; line-height:1; text-align:justify; }
+.legal-list { padding-left:12.5mm; text-indent:-7.5mm; text-align:justify; }
+.legal-copy table { width:100%; font-size:9.5pt; margin:12pt 0; border-collapse:collapse; }
+.legal-copy th { background:var(--document-aqua); color:var(--document-paper); text-transform:uppercase; text-align:left; padding:6pt; }
+.legal-copy td { padding:6pt; border-bottom:0.5pt solid var(--document-rule); }
+
+.office-header { height:var(--header-h); padding-top:env(safe-area-inset-top, 0px); }
+.office-content { padding-top:var(--header-h); }
+.attendance-workspace { display:grid; grid-template-columns:288px minmax(0,1fr); height:calc(100svh - var(--header-h)); overflow:hidden; }
+.attendance-conversation { display:grid; grid-template-columns:minmax(0,1fr); }
+.attendance-with-panel { grid-template-columns:minmax(0,1fr) 340px; }
+@media (min-width:1440px) { .attendance-with-panel { grid-template-columns:minmax(0,1fr) 360px; } }
+@media (max-width:1199px) {
+  .attendance-workspace { grid-template-columns:232px minmax(0,1fr); }
+  .attendance-with-panel { grid-template-columns:minmax(0,1fr) 284px; }
+  aside[aria-label="Detalhes do atendimento"] [role="tab"] { font-size:12px; padding-inline:4px; }
+}
+@media (min-width:768px) and (max-width:1050px) {
+  .attendance-workspace { grid-template-columns:240px minmax(0,1fr); }
+  .attendance-chat-header { height:auto; min-height:56px; display:grid; grid-template-columns:32px minmax(0,1fr); padding-top:6px; padding-bottom:6px; }
+  .attendance-chat-tools { grid-column:1 / -1; justify-content:flex-end; }
+}
+@media (max-width:767px) {
+  .attendance-workspace { grid-template-columns:minmax(0,1fr); grid-template-rows:210px minmax(0,1fr); }
+  .attendance-list { border-bottom:1px solid var(--border); }
+  .attendance-list > div:first-child { padding:6px 12px; }
+  .attendance-list h1 { display:none; }
+  .attendance-list > div:first-child { display:flex; flex-direction:column; align-items:stretch; gap:6px; }
+  .attendance-list > div:first-child > div { width:100%; }
+  .attendance-list > div:first-child > div { flex:1; min-width:0; }
+}
+
+/* Conversa estreita (painéis abertos em telas médias): nome do cliente ganha a linha inteira e as ferramentas descem. */
+.attendance-chat { container-type: inline-size; container-name: chat; }
+@container chat (max-width: 620px) {
+  .attendance-chat-header { height: auto; min-height: 64px; display: grid; grid-template-columns: 36px minmax(0,1fr); row-gap: 4px; padding-top: 8px; padding-bottom: 6px; }
+  .attendance-chat-tools { grid-column: 1 / -1; justify-content: flex-end; }
+}
+@container chat (max-width: 460px) {
+  .attendance-composer { flex-wrap: wrap; row-gap: 4px; }
+  .attendance-composer > textarea { order: 9; flex: 1 1 calc(100% - 48px); }
+  .attendance-composer > button[aria-label="Enviar mensagem"] { order: 10; }
+}
+
+/* Papel de parede só na área das mensagens da conversa (imagem já clareada em 42%); fica parado enquanto as mensagens rolam. */
+.attendance-messages { background-color: #FEFCF6; background-image: url("./assets/atendimento-wallpaper.webp"); background-repeat: repeat; background-size: 470px auto; background-position: top center; }
+
+/* Conversa no padrão do WhatsApp (só dentro da conversa do Atendimento). */
+.attendance-chat { --zap-out: #D9FDD3; --zap-in: #FFFFFF; --zap-meta: #667781; --zap-bar: #F0F2F5; --zap-send: #00A884; --zap-pill: #54656F; }
+.zap-bubble { border-radius: 8px; box-shadow: 0 1px 0.5px rgb(11 20 26 / 13%); color: #111B21; }
+.zap-in { background: var(--zap-in); }
+.zap-out { background: var(--zap-out); }
+.zap-tail.zap-in { border-top-left-radius: 0; }
+.zap-tail.zap-out { border-top-right-radius: 0; }
+.zap-tail::before { content: ""; position: absolute; top: 0; width: 8px; height: 13px; }
+.zap-tail.zap-in::before { left: -8px; background: var(--zap-in); clip-path: polygon(0 0, 100% 0, 100% 100%); }
+.zap-tail.zap-out::before { right: -8px; background: var(--zap-out); clip-path: polygon(0 0, 100% 0, 0 100%); }
+.zap-pill { display: inline-block; border-radius: 7.5px; background: #FFFFFF; color: var(--zap-pill); font-size: 12.5px; line-height: 1.35; padding: 5px 12px 6px; box-shadow: 0 1px 0.5px rgb(11 20 26 / 13%); }

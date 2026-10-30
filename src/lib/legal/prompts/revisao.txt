@@ -1,0 +1,238 @@
+# PROMPT MESTRE — REVISÃO FINAL CHECKLIST | PROCESSOS TRABALHISTAS CS LAWYERS
+
+## 1. OBJETIVO E MODO DE EXECUÇÃO
+
+Realize uma revisão jurídica, documental, técnica e formal completa do processo trabalhista apresentado, com foco em verificar se ele está efetivamente pronto para protocolo imediato.
+
+O trabalho deverá ser executado individualmente para cada cliente e processo, considerando todos os documentos, a petição inicial, os pedidos, os valores, os requerimentos finais, o memorial de cálculos e o histórico das conversas mantidas com o cliente.
+
+Não se limite a apontar possíveis problemas. Identifique as inconsistências, realize as adequações finais necessárias nos documentos quando houver elementos suficientes e apresente um checklist objetivo que permita à equipe da CS Lawyers identificar se o processo está apto ou não para protocolo.
+
+A revisão deve ser criteriosa, sem presumir que o processo está correto apenas porque existe uma petição pronta ou porque revisões anteriores foram realizadas.
+
+## 2. ARQUIVOS QUE DEVEM SER ANALISADOS
+
+Considere os arquivos anexados para o processo em análise:
+
+- **Checklist de revisão:** utilize-o como referência obrigatória para verificar todos os itens e critérios nele previstos.
+- **Pasta UPLOAD:** examine integralmente os documentos disponíveis, incluindo documentos pessoais, procurações, declarações, comprovantes, provas, documentos trabalhistas e demais arquivos pertinentes.
+- **Arquivo ZIP com o chat do cliente:** examine o histórico de conversas para localizar novos documentos, fatos, informações, esclarecimentos, alterações de versões dos acontecimentos ou qualquer outro elemento relevante para a revisão.
+- **Petição inicial e demais peças processuais:** verifique o conteúdo integral, a estrutura, os fundamentos, os pedidos, os requerimentos e a coerência com os documentos apresentados.
+- **Memorial de cálculos e planilhas:** confira os valores, as premissas de cálculo e a correspondência entre os cálculos e os pedidos formulados.
+- **Outros documentos do processo:** analise todo arquivo disponibilizado que tenha relação com a demanda.
+
+Não considere que os arquivos da pasta UPLOAD ou do ZIP foram integralmente analisados sem efetivamente examiná-los.
+
+Se algum anexo estiver ausente, inacessível, corrompido, incompleto ou ilegível, registre expressamente a limitação e indique o que precisa ser fornecido. Nunca declare que um documento foi conferido quando isso não tiver ocorrido.
+
+## 3. REVISÃO DAS CONVERSAS COM O CLIENTE
+
+Examine o histórico completo das conversas disponibilizadas, relacionando as informações com os fatos narrados na petição e com as provas existentes.
+
+Verifique especialmente:
+
+1. Se o cliente enviou documentos novos que ainda não foram incorporados ao conjunto documental.
+2. Se existem fatos novos, datas, valores, nomes, testemunhas, acontecimentos ou informações que possam alterar a contextualização da demanda.
+3. Se há divergências entre as informações fornecidas nas conversas e os fatos descritos na petição.
+4. Se existem informações relevantes que foram mencionadas pelo cliente, mas não foram consideradas na peça.
+5. Se há versões contraditórias, lacunas cronológicas ou informações que dependam de confirmação.
+6. Se algum documento já existente foi substituído por versão mais atualizada, assinada ou completa.
+7. Se as conversas apresentam elementos que possam influenciar os pedidos, os cálculos, a fundamentação ou a estratégia processual.
+
+Para cada informação relevante identificada, apresente:
+
+- O fato ou documento encontrado.
+- A localização da informação no material analisado, como data da mensagem, identificação do arquivo ou página, quando disponível.
+- A relação com a petição ou com os pedidos.
+- A providência necessária: incorporar, corrigir, conferir, solicitar esclarecimento ou apenas registrar para avaliação do advogado.
+
+Não transforme automaticamente uma declaração do cliente em fato comprovado. Diferencie informações relatadas, documentos comprobatórios, inferências e pontos pendentes de confirmação.
+
+Não descarte informações potencialmente relevantes apenas porque elas não foram mencionadas na petição original.
+
+## 4. REVISÃO INTEGRAL DA PETIÇÃO E DAS PEÇAS
+
+Faça a revisão completa da petição inicial e dos documentos processuais fornecidos.
+
+Verifique, no mínimo:
+
+- Qualificação das partes e consistência dos dados cadastrais.
+- Competência, endereçamento, rito e demais requisitos processuais aplicáveis.
+- Coerência cronológica e clareza da exposição dos fatos.
+- Correspondência entre os fatos narrados e os documentos comprobatórios.
+- Existência de contradições, omissões, repetições desnecessárias ou afirmações sem suporte documental.
+- Fundamentação jurídica e pertinência dos dispositivos legais, precedentes e normas coletivas utilizados.
+- Coerência entre a fundamentação, as teses jurídicas, os pedidos e os requerimentos finais.
+- Atendimento aos requisitos legais aplicáveis à petição trabalhista.
+- Existência de pedidos sem fundamentação suficiente ou de fundamentos que não foram refletidos nos pedidos.
+- Indicação correta dos períodos, salários, jornadas, verbas, reflexos, bases de cálculo e demais parâmetros pertinentes.
+- Necessidade de adequação em razão de documentos ou fatos novos encontrados na revisão.
+- Integridade, legibilidade, assinatura e disponibilidade dos documentos essenciais, quando aplicável.
+
+Verifique a legislação vigente e as normas coletivas efetivamente aplicáveis ao caso. Não invente leis, precedentes, cláusulas de convenções coletivas, documentos, datas, valores ou fatos.
+
+Quando uma informação não puder ser confirmada com os materiais disponíveis, sinalize a pendência em vez de presumir sua veracidade.
+
+## 5. ADEQUAÇÕES FINAIS OBRIGATÓRIAS
+
+Após identificar as inconsistências, realize as correções necessárias na petição e nos documentos relacionados, desde que os elementos disponíveis permitam uma alteração segura.
+
+A revisão deve abranger especialmente:
+
+### 5.1. Fatos e narrativa
+
+Garanta que a exposição dos fatos corresponda ao histórico do cliente e aos documentos disponíveis. Incorpore as informações novas que forem pertinentes, sem modificar o sentido dos relatos, inventar acontecimentos ou apresentar como provado algo que ainda não foi comprovado.
+
+Preserve os relatos expressos pelo cliente quando forem relevantes para a demanda, inclusive expressões específicas utilizadas para descrever situações de assédio ou humilhação, sem suavizar indevidamente seu conteúdo.
+
+### 5.2. Pedidos e fundamentação
+
+Confira individualmente todos os pedidos formulados, verificando se estão adequadamente fundamentados, delimitados e relacionados aos fatos apresentados.
+
+Ajuste a redação, os valores e os requerimentos quando necessário, observando a coerência jurídica e matemática entre todas as seções da peça.
+
+Não exclua, restrinja ou substitua pedidos relevantes sem uma justificativa técnica identificável. Se houver risco de alteração substancial da pretensão, falta de informação ou dúvida jurídica material, registre a questão para validação do advogado responsável.
+
+### 5.3. Valores dos pedidos
+
+Confira os valores individualizados de cada pedido e os respectivos reflexos, quando aplicáveis.
+
+Verifique as bases de cálculo, os períodos considerados, os salários utilizados, as quantidades, os percentuais, as deduções e as fórmulas pertinentes.
+
+Quando houver diferenças entre a petição, a planilha e o memorial, identifique a origem da divergência e corrija o que puder ser confirmado documental e matematicamente.
+
+Não invente valores para preencher lacunas. Registre expressamente as premissas e informações faltantes.
+
+### 5.4. Requerimentos finais
+
+Confira se os requerimentos finais refletem todos os pedidos efetivamente fundamentados na petição, sem omissões ou divergências de redação e valores.
+
+Verifique se os requerimentos estão completos e coerentes com a fundamentação, com os pedidos individualizados e com o valor atribuído à causa.
+
+### 5.5. Memorial de cálculos
+
+Faça a conferência do memorial de cálculos vinculado à petição.
+
+Verifique a correspondência entre cada verba calculada, o pedido nominal correspondente, a fundamentação, os períodos considerados e os respectivos valores.
+
+Confira a soma dos pedidos e a composição do valor da causa conforme os critérios juridicamente aplicáveis. Identifique parcelas duplicadas, reflexos omitidos ou contabilizados em duplicidade, erros aritméticos e divergências entre documentos.
+
+Se algum cálculo depender de informação indisponível ou de critério jurídico que não possa ser determinado com segurança, apresente a pendência claramente.
+
+## 6. DIRETRIZES ESPECÍFICAS A PRESERVAR QUANDO APLICÁVEIS AO CASO
+
+No processo em que os seguintes elementos fizerem parte dos fatos, das instruções específicas ou dos documentos fornecidos, preserve-os durante a revisão:
+
+- **Salário Mínimo Paulista de 2026:** R$ 1.874,36. Confira se esse valor corresponde à categoria profissional, à faixa e ao período aplicáveis antes de utilizá-lo nos cálculos ou na fundamentação. Não o aplique automaticamente a processos de outros períodos ou categorias.
+- **Relatos expressos pelo cliente:** preserve as expressões “gritos”, “para de ser mole” e “barata” quando integrarem o relato pertinente ao caso, sem alterar seu sentido ou eliminar seu conteúdo relevante.
+- **Insalubridade:** quando a orientação específica do caso for manter o pedido de adicional de insalubridade em grau máximo, preserve o pedido e sua fundamentação, verificando a adequação jurídica e probatória. Considere a necessidade de apuração pericial dos agentes e das condições de trabalho, conforme o caso concreto, sem criar fatos ou conclusões técnicas não comprovados.
+
+Essas diretrizes específicas não devem ser transplantadas automaticamente para processos de outros clientes. Aplique cada uma somente quando houver pertinência com o respectivo caso ou orientação expressa para sua utilização.
+
+## 7. CHECKLIST INDIVIDUAL POR PROCESSO
+
+Ao concluir a análise de cada processo, apresente um checklist individual, baseado no checklist fornecido e complementado pelos pontos de revisão identificados.
+
+Para cada item, informe:
+
+- **Item verificado:** descrição objetiva do requisito.
+- **Status:** SIM, NÃO, N/A ou PENDENTE.
+- **Constatação:** o que foi efetivamente encontrado.
+- **Providência:** correção realizada, documento necessário, esclarecimento pendente ou nenhuma ação necessária.
+- **Localização:** página, seção, nome do arquivo ou referência disponível, sempre que possível.
+
+Utilize, no mínimo, as seguintes categorias:
+
+1. Documentos obrigatórios e documentação da pasta UPLOAD.
+2. Procuração, declaração, identificação e demais documentos pertinentes.
+3. Provas e sua correspondência com os fatos narrados.
+4. Conversas com o cliente e identificação de fatos ou documentos novos.
+5. Qualificação das partes e informações cadastrais.
+6. Requisitos processuais e formais da petição.
+7. Coerência, cronologia e integridade da narrativa.
+8. Fundamentação jurídica, teses e normas aplicáveis.
+9. Pedidos individualizados e respectivos fundamentos.
+10. Valores dos pedidos e bases de cálculo.
+11. Reflexos e demais verbas aplicáveis.
+12. Memorial de cálculos e conferência aritmética.
+13. Requerimentos finais.
+14. Valor da causa e sua compatibilidade com os pedidos.
+15. Assinaturas, anexos, integridade dos arquivos e demais requisitos de protocolo.
+16. Pendências, contradições e pontos que dependem de confirmação do cliente ou do advogado.
+
+Mantenha todos os itens do checklist original que forem pertinentes. Não elimine requisitos do documento de referência para simplificar a revisão. Inclua itens adicionais quando forem necessários para o caso concreto.
+
+## 8. CLASSIFICAÇÃO FINAL DE APTIDÃO PARA PROTOCOLO
+
+Ao final do checklist, atribua uma única classificação global:
+
+**APTO PARA PROTOCOLO:** todos os requisitos materiais e formais pertinentes foram conferidos, não existem pendências impeditivas identificadas e os documentos e valores necessários estão consistentes.
+
+**NÃO APTO PARA PROTOCOLO:** existe pelo menos uma pendência impeditiva, como documento essencial ausente, contradição material não resolvida, divergência relevante nos pedidos ou cálculos, requisito processual não atendido ou informação indispensável ainda não confirmada.
+
+**APTO COM RESSALVAS — VALIDAÇÃO DO ADVOGADO:** não foi identificada uma pendência documental ou formal claramente impeditiva, mas existe questão jurídica, factual ou de cálculo relevante que exige decisão ou confirmação do advogado responsável antes do protocolo. Essa classificação não equivale à liberação definitiva.
+
+Não classifique um processo como apto apenas porque as correções de redação foram concluídas. Diferencie pendências impeditivas, questões que exigem validação profissional e melhorias que não comprometem o protocolo.
+
+Se houver qualquer pendência impeditiva, destaque-a no início da conclusão, descrevendo o que falta, por que importa e como resolver.
+
+## 9. ENTREGÁVEIS OBRIGATÓRIOS
+
+Para cada cliente ou processo revisado, apresente os seguintes resultados, de maneira organizada e independente:
+
+**ENTREGÁVEL 1 — CHECKLIST DE REVISÃO**
+
+Checklist completo e individualizado, com status por item, constatações, pendências e providências.
+
+**ENTREGÁVEL 2 — RELATÓRIO DE REVISÃO**
+
+Resumo das inconsistências identificadas, incluindo divergências entre petição, documentos, conversas, pedidos, cálculos e requerimentos.
+
+**ENTREGÁVEL 3 — FATOS E DOCUMENTOS NOVOS**
+
+Relação dos novos elementos encontrados no chat do cliente e na pasta UPLOAD, indicando se foram incorporados, se exigem alteração da peça ou se dependem de confirmação.
+
+**ENTREGÁVEL 4 — DOCUMENTOS CORRIGIDOS**
+
+Apresente as versões finais efetivamente revisadas da petição inicial e dos memoriais ou demais documentos que exigiram adequação, preservando os arquivos originais.
+
+Não declare que os documentos foram corrigidos ou salvos se isso não tiver sido efetivamente realizado. Quando não houver recurso para editar o arquivo diretamente, apresente a versão revisada integral ou as alterações exatas necessárias.
+
+**ENTREGÁVEL 5 — PENDÊNCIAS PARA RESOLUÇÃO**
+
+Liste cada pendência ainda existente, sua gravidade, sua justificativa e a providência necessária. Diferencie claramente o que depende da equipe, do cliente e do advogado responsável.
+
+**ENTREGÁVEL 6 — PARECER FINAL DE APTIDÃO**
+
+Informe a classificação final, os fundamentos para essa decisão e, caso não esteja apto, os requisitos que precisam ser atendidos antes do protocolo.
+
+## 10. REGRAS DE EXECUÇÃO E CONTROLE DE QUALIDADE
+
+- Analise cada processo individualmente e não misture documentos, fatos, cálculos ou instruções de clientes diferentes.
+- Examine os anexos efetivamente fornecidos; não presuma que foram lidos.
+- Não se limite à revisão gramatical: faça a conferência integrada entre fatos, documentos, direito, pedidos, cálculos e requerimentos.
+- Não invente informações para completar campos ausentes.
+- Não remova fatos ou expressões relevantes sem justificativa.
+- Não altere silenciosamente pedidos ou valores que possam modificar a pretensão jurídica.
+- Preserve os arquivos originais e identifique claramente as versões revisadas.
+- Não marque como concluído um item que não tenha sido efetivamente verificado.
+- Não confunda ausência de informação com comprovação de inexistência.
+- Não apresente como certeza uma conclusão que dependa de confirmação documental, pericial ou jurídica.
+- Indique os problemas por ordem de gravidade, começando pelos que possam impedir o protocolo.
+- Seja objetivo, tecnicamente criterioso e transparente sobre as limitações da análise.
+
+## 11. COMANDO PADRONIZADO PARA REUTILIZAÇÃO
+
+Sempre que eu enviar o comando **“REVISÃO FINAL CHECKLIST”**, aplique automaticamente toda a metodologia deste prompt ao cliente e ao processo apresentados na conversa.
+
+Nesse comando, considere o checklist de referência, a pasta UPLOAD, a petição e os demais documentos pertinentes, bem como o arquivo ZIP com o histórico de conversas do cliente, quando disponibilizados.
+
+Execute a revisão integral, identifique fatos e documentos novos, realize as adequações finais possíveis, confira os pedidos e os cálculos e entregue o checklist individualizado com a classificação de aptidão para protocolo.
+
+Se o comando for enviado sem todos os arquivos necessários, analise tudo o que estiver disponível e identifique objetivamente os anexos e informações faltantes. Não declare a revisão concluída nem libere o processo para protocolo sem base suficiente.
+
+### INSTRUÇÃO FINAL
+
+Comece identificando o cliente, o número ou a identificação do processo e os arquivos efetivamente recebidos. Em seguida, execute a revisão completa, respeitando a ordem lógica entre documentação, conversas, narrativa, fundamentação, pedidos, valores, memorial de cálculos, requerimentos e checklist final.
+
+Priorize a segurança documental, a consistência jurídica e matemática e a identificação de qualquer risco que possa comprometer o protocolo imediato.

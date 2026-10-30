@@ -1,0 +1,11 @@
+import { useState } from 'react';
+import { useServerFn } from '@tanstack/react-start';
+import { Send, Sparkles } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { atendimentoAI } from '@/lib/atendimento.functions';
+import { n8n } from '@/services/integracoes';
+import { executar } from '@/lib/executar';
+import type { Movement } from '@/lib/office';
+export function MovementNotice({movement,caseId,onClose,onSent}:{movement:Movement|undefined;caseId:string;onClose:()=>void;onSent:(id:string)=>Promise<unknown>}){const ai=useServerFn(atendimentoAI);const [text,setText]=useState('');const [alerts,setAlerts]=useState<string[]>([]);const [busy,setBusy]=useState(false);return <Dialog open={!!movement} onOpenChange={v=>{if(!v&&!busy){onClose();setText('');setAlerts([]);}}}><DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto"><DialogHeader><DialogTitle>Avisar o cliente</DialogTitle></DialogHeader><h3 className="text-sm font-semibold">Texto original</h3><p className="whitespace-pre-wrap border-b pb-4 text-justify font-doc text-base">{movement?.texto}</p><div className="flex items-center justify-between gap-3"><h3 className="text-sm font-semibold">Linguagem simples</h3><Button size="sm" variant="outline" disabled={busy} onClick={async()=>{if(!movement)return;setBusy(true);await executar('Simplificar andamento',async()=>{const r=await ai({data:{casoId:caseId,kind:'andamento',texto:movement.texto}});setText(r.texto);setAlerts(r.alertas);});setBusy(false);}}><Sparkles/>Gerar com IA</Button></div><Textarea aria-label="Aviso em linguagem simples" className="min-h-32" value={text} onChange={e=>setText(e.target.value)}/>{alerts.length>0&&<p className="bg-pending p-2 text-xs text-pending-foreground">[ATENÇÃO] Revise: {alerts.join(', ')}</p>}<DialogFooter><Button disabled={busy||!text.trim()} onClick={async()=>{if(!movement)return;setBusy(true);await executar('Avisar cliente',async()=>{await n8n.enviarAvisoAndamento({processo:movement.cnj,texto:text});await onSent(movement.id);onClose();setText('');});setBusy(false);}}><Send/>{alerts.length?'Enviar mesmo assim':'Enviar aviso'}</Button></DialogFooter></DialogContent></Dialog>;}

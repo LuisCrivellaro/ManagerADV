@@ -83,6 +83,21 @@ export function priorizarAgendamentoAna(r:AnaResult,texto:string,emAgendamento=f
   const continuidade=emAgendamento&&!!r.dados_coletados.nome.trim();
   return pedido||continuidade?{...r,intencao:'agendamento'}:r;
 }
+/** Saudação oficial ao cliente novo (decisão da Dra. em 30/10/2026). Texto exato, sem pedir dados. */
+export const SAUDACAO_CLIENTE_NOVO = 'Olá!\n\nSeja bem-vindo(a)! 😊\n\nEquipe CS Advocacia\nwww.carolinasantos.com.br\n\nVou te ajudar!\n\nNossa primeira consulta é on-line e gratuita.\n\nComo podemos te ajudar?';
+
+/** Mensagem só de cumprimento ("oi", "boa tarde, tudo bem?"), sem pedido. */
+export function apenasCumprimentoAna(texto:string):boolean {
+  const t=texto.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z\s]/g,' ').replace(/\s+/g,' ').trim();
+  return t.length>0&&/^(?:(?:ola|oi|oie|opa|alo|bom dia|boa tarde|boa noite|tudo bem|tudo bom|td bem|e ai|eai|como vai|hello|hey|ei)\s*)+$/.test(t);
+}
+
+/** Primeiro contato de cliente novo que só cumprimentou: o servidor envia a saudação oficial exata. */
+export function saudacaoClienteNovo(r:AnaResult,texto:string,o:{apresentado:boolean;tipoCliente?:TipoCliente | undefined}):AnaResult {
+  if(o.apresentado||o.tipoCliente==='cadastrado'||r.acao!=='enviar'||r.encaminhar_humano||!apenasCumprimentoAna(texto))return r;
+  return {...r,mensagem:SAUDACAO_CLIENTE_NOVO,intencao:'duvida_geral'};
+}
+
 export function aplicarRegrasAna(r:AnaResult, mode:AIMode, texto:string, proibidos:string[],options:{teste?:boolean;horarios?:string[];ultimaResposta?:string;now?:Date;agendaReal?:boolean;tipoCliente?:TipoCliente | undefined;nome?:string;telefone?:string | undefined;emailPendente?:boolean}={}):AnaResult {
   let result = { ...r, dados_coletados:{...r.dados_coletados} };
   const folded = texto.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();

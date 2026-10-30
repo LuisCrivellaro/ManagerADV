@@ -1,0 +1,3 @@
+import { createFileRoute } from '@tanstack/react-router';
+import { ConnectionStatusPage } from '@/components/office/connection-status';
+export const Route=createFileRoute('/_authenticated/integracoes')({head:()=>({meta:[{title:'Integrações — Manager ADV'},{name:'description',content:'Status de acesso a ProJuris, ZapSign, Mercado Pago e UltraMsg no escritório CS Lawyers.'},{property:'og:title',content:'Integrações — Manager ADV'},{property:'og:description',content:'Status e verificação segura das integrações do escritório.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}]}),component:ConnectionStatusPage});
